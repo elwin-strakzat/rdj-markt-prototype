@@ -1,8 +1,12 @@
 import svgPaths from "./svg-qgah2uzsyb";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
-import imgAvatar1 from "figma:asset/3627de284acb374a4d9313b3c2dbaeeb87a48224.png";
-import imgAvatar2 from "figma:asset/9e45f45f537bea4bf653bc0307471e5ff5545f63.png";
-import imgAvatar3 from "figma:asset/7881cf10e51b32871721baa06e0532dcdfef9031.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
+// import imgAvatar1 from "figma:asset/3627de284acb374a4d9313b3c2dbaeeb87a48224.png";
+const imgAvatar1 = "";
+// import imgAvatar2 from "figma:asset/9e45f45f537bea4bf653bc0307471e5ff5545f63.png";
+const imgAvatar2 = "";
+// import imgAvatar3 from "figma:asset/7881cf10e51b32871721baa06e0532dcdfef9031.png";
+const imgAvatar3 = "";
 
 function Group() {
   return (

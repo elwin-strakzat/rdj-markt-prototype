@@ -1,5 +1,6 @@
 import svgPaths from "./svg-gjl6m1r792";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
 
 function Group() {
   return (

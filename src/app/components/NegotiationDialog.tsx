@@ -4,7 +4,8 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import Badge from "./Badge";
 import svgPaths from "../../imports/svg-kcwma38iau";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
 
 /* ── Timeline types ── */
 interface TimelineEvent {

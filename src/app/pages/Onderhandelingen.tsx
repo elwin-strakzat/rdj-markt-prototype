@@ -11,7 +11,8 @@ import type { Column } from "../components/Table";
 import Button from "../components/Button";
 import NegotiationDialog from "../components/NegotiationDialog";
 import svgPaths from "../../imports/svg-q07ncv0e2v";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
 
 /* ── Status badge mapping ── */
 const statusVariantMap: Record<string, string> = {

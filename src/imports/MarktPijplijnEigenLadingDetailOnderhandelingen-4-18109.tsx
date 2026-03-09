@@ -1,9 +1,14 @@
 import svgPaths from "./svg-tywkapk8us";
-import imgMarktPijplijnEigenLadingDetailOnderhandelingen from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
-import imgMarktPijplijnEigenLadingDetailOnderhandelingen1 from "figma:asset/3627de284acb374a4d9313b3c2dbaeeb87a48224.png";
-import imgMarktPijplijnEigenLadingDetailOnderhandelingen2 from "figma:asset/e7809035038b3816de2a1d67c5de86ebeed325d0.png";
-import imgMarktPijplijnEigenLadingDetailOnderhandelingen3 from "figma:asset/bf485cb6f98c12534c69bc81459ce34f2e24e4a8.png";
-import imgMarktPijplijnEigenLadingDetailOnderhandelingen4 from "figma:asset/9e45f45f537bea4bf653bc0307471e5ff5545f63.png";
+// import imgMarktPijplijnEigenLadingDetailOnderhandelingen from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgMarktPijplijnEigenLadingDetailOnderhandelingen = "";
+// import imgMarktPijplijnEigenLadingDetailOnderhandelingen1 from "figma:asset/3627de284acb374a4d9313b3c2dbaeeb87a48224.png";
+const imgMarktPijplijnEigenLadingDetailOnderhandelingen1 = "";
+// import imgMarktPijplijnEigenLadingDetailOnderhandelingen2 from "figma:asset/e7809035038b3816de2a1d67c5de86ebeed325d0.png";
+const imgMarktPijplijnEigenLadingDetailOnderhandelingen2 = "";
+// import imgMarktPijplijnEigenLadingDetailOnderhandelingen3 from "figma:asset/bf485cb6f98c12534c69bc81459ce34f2e24e4a8.png";
+const imgMarktPijplijnEigenLadingDetailOnderhandelingen3 = "";
+// import imgMarktPijplijnEigenLadingDetailOnderhandelingen4 from "figma:asset/9e45f45f537bea4bf653bc0307471e5ff5545f63.png";
+const imgMarktPijplijnEigenLadingDetailOnderhandelingen4 = "";
 
 export default function MarktPijplijnEigenLadingDetailOnderhandelingen() {
   return (
