@@ -8,7 +8,8 @@ import Pagination from "../components/Pagination";
 import Table from "../components/Table";
 import type { Column } from "../components/Table";
 import svgPaths from "../../imports/svg-q07ncv0e2v";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
 import { usePijplijnData, usePijplijnVaartuigen, type PijplijnItem, type PijplijnVaartuigItem } from "../data/useMarktData";
 
 export default function Pijplijn() {

@@ -1,5 +1,6 @@
 import svgPaths from "./svg-k3lkdbz47k";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
 
 function TextAndBadge() {
   return (

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router";
 import { toast } from "sonner";
 import svgPaths from "../../imports/svg-kcwma38iau";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
 
 interface TimelineEvent {
   id: string;

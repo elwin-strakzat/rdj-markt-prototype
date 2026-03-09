@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router";
 import svgPaths from "../../imports/svg-5lxjaeghl9";
-import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+// import imgAvatar from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgAvatar = "";
 import svgPathsMenu from "../../imports/svg-80ushx2b4a";
 
 export default function Sidebar() {

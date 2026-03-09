@@ -1,9 +1,14 @@
 import svgPaths from "./svg-3yp6dq55tt";
-import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
-import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop1 from "figma:asset/3627de284acb374a4d9313b3c2dbaeeb87a48224.png";
-import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop2 from "figma:asset/e7809035038b3816de2a1d67c5de86ebeed325d0.png";
-import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop3 from "figma:asset/bf485cb6f98c12534c69bc81459ce34f2e24e4a8.png";
-import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop4 from "figma:asset/9e45f45f537bea4bf653bc0307471e5ff5545f63.png";
+// import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop from "figma:asset/a2737d3b5b234fc04041650cb9f114889c6859da.png";
+const imgMarktBevrachtingLadingDetailOnderhandelingenDesktop = "";
+// import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop1 from "figma:asset/3627de284acb374a4d9313b3c2dbaeeb87a48224.png";
+const imgMarktBevrachtingLadingDetailOnderhandelingenDesktop1 = "";
+// import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop2 from "figma:asset/e7809035038b3816de2a1d67c5de86ebeed325d0.png";
+const imgMarktBevrachtingLadingDetailOnderhandelingenDesktop2 = "";
+// import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop3 from "figma:asset/bf485cb6f98c12534c69bc81459ce34f2e24e4a8.png";
+const imgMarktBevrachtingLadingDetailOnderhandelingenDesktop3 = "";
+// import imgMarktBevrachtingLadingDetailOnderhandelingenDesktop4 from "figma:asset/9e45f45f537bea4bf653bc0307471e5ff5545f63.png";
+const imgMarktBevrachtingLadingDetailOnderhandelingenDesktop4 = "";
 
 export default function MarktBevrachtingLadingDetailOnderhandelingenDesktop() {
   return (
