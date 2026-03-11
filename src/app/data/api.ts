@@ -69,6 +69,19 @@ export interface Relatie {
   id: string;
   naam: string;
   contactPersoonIds: string[];
+  adres?: string;
+  postcode?: string;
+  plaats?: string;
+  land?: string;
+  telefoon?: string;
+  email?: string;
+  website?: string;
+  ladingGroepen?: string[];
+  eigenaarId?: string;
+  status?: 'actief' | 'inactief' | 'prospect';
+  contactFrequentie?: 'wekelijks' | 'maandelijks' | 'kwartaal' | 'geen';
+  laatsteContact?: string;
+  opmerkingen?: string;
 }
 
 export interface ContactPersoon {
@@ -77,6 +90,8 @@ export interface ContactPersoon {
   email: string;
   telefoon: string;
   relatieId: string;
+  functie?: string;
+  eigenaarId?: string;
 }
 
 export interface LadingSoort {
@@ -245,6 +260,50 @@ export interface Bod {
   liggeldLossen: number;
   laagwaterToeslag: number;
   status: string;
+}
+
+// ── CRM Contract types ──
+
+export type ContractType = "spot" | "contract";
+export type ContractSoort = "bevrachting" | "verhuur_duwbak" | "op_overslag" | "inspectie_goederen";
+export type ContractStatus = "aandacht_nodig" | "in_onderhandeling" | "gewonnen" | "verloren";
+
+export interface ContractRoute {
+  id: string;
+  laadhavenNaam: string;
+  loshavenNaam: string;
+  tonnage?: number;
+  vrachtprijs?: number;
+}
+
+export interface Contract {
+  id: string;
+  titel: string;
+  relatieId: string;
+  contactPersoonId?: string;
+  eigenaarId?: string;
+  type: ContractType;
+  soort: ContractSoort;
+  status: ContractStatus;
+  verlorenReden?: string;
+  waarde?: number;
+  // Ladingsoort (type lading)
+  ladingSoortId?: string;
+  // Spot
+  laadhavenNaam?: string;
+  loshavenNaam?: string;
+  tonnage?: number;
+  vrachtprijs?: number;
+  laaddatum?: string;
+  losdatum?: string;
+  // Contract
+  startDatum?: string;
+  eindDatum?: string;
+  routes?: ContractRoute[];
+  // Meta
+  aanmaakDatum: string;
+  laatsteUpdate: string;
+  opmerkingen?: string;
 }
 
 // ── CRUD operations ──

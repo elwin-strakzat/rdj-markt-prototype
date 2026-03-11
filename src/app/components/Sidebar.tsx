@@ -6,21 +6,33 @@ import svgPathsMenu from "../../imports/svg-80ushx2b4a";
 
 export default function Sidebar() {
   const [showMarktMenu, setShowMarktMenu] = useState(false);
+  const [showCrmMenu, setShowCrmMenu] = useState(false);
   const [menuTop, setMenuTop] = useState(0);
+  const [crmMenuTop, setCrmMenuTop] = useState(0);
   const marktButtonRef = useRef<HTMLDivElement>(null);
+  const crmButtonRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const crmMenuRef = useRef<HTMLDivElement>(null);
   const hoverZoneRef = useRef<HTMLDivElement>(null);
+  const crmHoverZoneRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const crmCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const location = useLocation();
 
   // Check if current page is a markt-related page
-  const isMarktPage = location.pathname === '/inbox' || 
-                      location.pathname === '/bevrachting' || 
+  const isMarktPage = location.pathname === '/inbox' ||
+                      location.pathname === '/bevrachting' ||
                       location.pathname.startsWith('/inbox/') ||
                       location.pathname.startsWith('/lading/') ||
                       location.pathname.startsWith('/vaartuig/') ||
                       location.pathname.startsWith('/markt/');
+
+  // Check if current page is a Lading page
+  const isLadingPage = location.pathname === '/lading' || location.pathname.startsWith('/lading/');
+
+  // Check if current page is a CRM page
+  const isCrmPage = location.pathname.startsWith('/crm/');
 
   const cancelClose = useCallback(() => {
     if (closeTimeoutRef.current) {
@@ -80,11 +92,40 @@ export default function Sidebar() {
   // Clean up timeout on unmount
   useEffect(() => {
     return () => {
-      if (closeTimeoutRef.current) {
-        clearTimeout(closeTimeoutRef.current);
-      }
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+      if (crmCloseTimeoutRef.current) clearTimeout(crmCloseTimeoutRef.current);
     };
   }, []);
+
+  // CRM menu handlers
+  const cancelCrmClose = useCallback(() => {
+    if (crmCloseTimeoutRef.current) {
+      clearTimeout(crmCloseTimeoutRef.current);
+      crmCloseTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleCrmClose = useCallback((delay = 100) => {
+    cancelCrmClose();
+    crmCloseTimeoutRef.current = setTimeout(() => {
+      setShowCrmMenu(false);
+    }, delay);
+  }, [cancelCrmClose]);
+
+  const handleCrmMouseEnter = useCallback(() => {
+    cancelCrmClose();
+    if (crmButtonRef.current) {
+      const buttonRect = crmButtonRef.current.getBoundingClientRect();
+      const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+      const estimatedMenuHeight = 90;
+      setCrmMenuTop(buttonCenterY - estimatedMenuHeight / 2);
+    }
+    setShowCrmMenu(true);
+  }, [cancelCrmClose]);
+
+  const handleCrmMouseLeave = useCallback(() => {
+    scheduleCrmClose(150);
+  }, [scheduleCrmClose]);
 
   const handleMarktMouseEnter = useCallback(() => {
     cancelClose();
@@ -138,6 +179,11 @@ export default function Sidebar() {
     { label: "Onderhandelingen", path: "/markt/onderhandelingen/ladingen" },
   ];
 
+  const crmMenuItems = [
+    { label: "Relaties", path: "/crm/relaties" },
+    { label: "Deals", path: "/crm/deals" },
+  ];
+
   return (
     <div className="bg-rdj-bg-secondary relative shrink-0 w-[72px] h-screen sticky top-0 z-50" data-name="Sidebar navigation">
       <div className="content-stretch flex items-start justify-center overflow-clip relative rounded-[inherit] size-full">
@@ -169,20 +215,20 @@ export default function Sidebar() {
               <div className="flex flex-col items-center size-full">
                 <div className="content-stretch flex flex-col gap-[16px] items-center px-[16px] relative w-full">
                   {/* Lading */}
-                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
-                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px]" data-name="_Nav item button">
+                  <Link to="/lading" className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
+                    <div className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] ${isLadingPage ? 'bg-[#e3effb]' : ''}`} data-name="_Nav item button">
                       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="container">
                         <div className="absolute inset-[8.93%_12.5%]" data-name="Icon">
                           <div className="absolute inset-[-5.07%_-5.56%]">
                             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20.0007 21.7121">
-                              <path d={svgPaths.p7ea7b00} id="Icon" stroke="var(--stroke-0, #667085)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                              <path d={svgPaths.p7ea7b00} id="Icon" stroke={isLadingPage ? "#1567A4" : "#667085"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                             </svg>
                           </div>
                         </div>
                       </div>
                     </div>
                     <p className="font-sans font-normal leading-[18px] relative shrink-0 text-[#344054] text-[12px] whitespace-nowrap">Lading</p>
-                  </div>
+                  </Link>
                   
                   {/* Vloot */}
                   <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
@@ -254,20 +300,26 @@ export default function Sidebar() {
                     <p className="font-sans font-normal leading-[18px] relative shrink-0 text-[#344054] text-[12px] whitespace-nowrap">Backoffice</p>
                   </div>
                   
-                  {/* Relaties */}
+                  {/* CRM */}
                   <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
-                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px]" data-name="_Nav item button">
+                    <div
+                      className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] cursor-pointer ${isCrmPage ? 'bg-[#e3effb]' : ''}`}
+                      data-name="_Nav item button"
+                      ref={crmButtonRef}
+                      onMouseEnter={handleCrmMouseEnter}
+                      onMouseLeave={handleCrmMouseLeave}
+                    >
                       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="users-01">
                         <div className="absolute inset-[12.5%_8.33%]" data-name="Icon">
                           <div className="absolute inset-[-5.56%_-5%]">
                             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22 20">
-                              <path d={svgPaths.p364ae300} id="Icon" stroke="var(--stroke-0, #667085)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                              <path d={svgPaths.p364ae300} id="Icon" stroke={isCrmPage ? "#1567A4" : "#667085"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                             </svg>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <p className="font-sans font-normal leading-[18px] relative shrink-0 text-[#344054] text-[12px] whitespace-nowrap">Relaties</p>
+                    <p className="font-sans font-normal leading-[18px] relative shrink-0 text-[#344054] text-[12px] whitespace-nowrap">CRM</p>
                   </div>
                 </div>
               </div>
@@ -323,6 +375,78 @@ export default function Sidebar() {
             onMouseMove={handleSafetyZoneMouseMove}
             onMouseLeave={handleSafetyZoneMouseLeave}
           />
+        </div>
+      )}
+
+      {/* CRM Safety triangle hover zone */}
+      {showCrmMenu && (
+        <div
+          ref={crmHoverZoneRef}
+          className="fixed inset-0 z-[60]"
+          style={{ pointerEvents: 'none' }}
+        >
+          <div
+            className="absolute"
+            style={{
+              left: '72px',
+              top: `${crmMenuTop - 20}px`,
+              width: '20px',
+              height: crmMenuRef.current ? `${crmMenuRef.current.getBoundingClientRect().height + 40}px` : '120px',
+              pointerEvents: 'auto',
+            }}
+            onMouseMove={(e) => {
+              if (!showCrmMenu) return;
+              cancelCrmClose();
+            }}
+            onMouseLeave={() => {
+              if (showCrmMenu) scheduleCrmClose(80);
+            }}
+          />
+        </div>
+      )}
+
+      {/* CRM Menu */}
+      {showCrmMenu && (
+        <div
+          ref={crmMenuRef}
+          className="fixed left-[80px] w-[160px] bg-white rounded-[6px] shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)] z-[70]"
+          style={{ top: `${crmMenuTop}px` }}
+          onMouseEnter={cancelCrmClose}
+          onMouseLeave={() => scheduleCrmClose(100)}
+        >
+          <div className="content-stretch flex flex-col items-start overflow-clip relative rounded-[inherit] size-full">
+            <div className="content-stretch flex flex-col items-start overflow-clip py-[4px] relative shrink-0 w-full">
+              {crmMenuItems.map((item) => {
+                const isActive = location.pathname.startsWith(item.path);
+                return (
+                  <div key={item.path} className="relative shrink-0 w-full">
+                    <div className="flex flex-row items-center size-full">
+                      <div className="content-stretch flex items-center px-[4px] py-px relative w-full">
+                        <Link
+                          to={item.path}
+                          onClick={() => setShowCrmMenu(false)}
+                          className={`flex-[1_0_0] min-h-px min-w-px relative rounded-[4px] ${
+                            isActive ? 'bg-rdj-bg-secondary' : 'hover:bg-rdj-bg-secondary'
+                          } transition-colors duration-150`}
+                        >
+                          <div className="flex flex-row items-center size-full">
+                            <div className="content-stretch flex items-center px-[8px] py-[9px] relative w-full">
+                              <p className={`flex-[1_0_0] font-sans font-bold leading-[20px] min-h-px min-w-px relative text-[14px] ${
+                                isActive ? 'text-[#182230]' : 'text-[#344054]'
+                              }`}>
+                                {item.label}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div aria-hidden="true" className="absolute border border-rdj-border-secondary border-solid inset-0 pointer-events-none rounded-[6px] shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]" />
         </div>
       )}
 

@@ -12,6 +12,14 @@ import NieuwBod from "./pages/NieuwBod";
 import NieuweOnderhandeling from "./pages/NieuweOnderhandeling";
 import Onderhandelingen from "./pages/Onderhandelingen";
 import DatabaseAdmin from "./pages/DatabaseAdmin";
+import Relaties from "./pages/Relaties";
+import RelatieDetail from "./pages/RelatieDetail";
+import Contracten from "./pages/Contracten";
+import ContractDetail from "./pages/ContractDetail";
+import CrmLadingDetail from "./pages/CrmLadingDetail";
+import CrmVaartuigDetail from "./pages/CrmVaartuigDetail";
+import Ladingen from "./pages/Ladingen";
+import LadingModuleDetail from "./pages/LadingModuleDetail";
 
 function RootLayout() {
   return <Outlet />;
@@ -167,6 +175,43 @@ export const router = createBrowserRouter([
       {
         path: "markt/database",
         Component: DatabaseAdmin,
+      },
+      // CRM
+      {
+        path: "crm",
+        element: <Navigate to="/crm/relaties" replace />,
+      },
+      {
+        path: "crm/relaties",
+        Component: Relaties,
+      },
+      {
+        path: "crm/relatie/:id",
+        Component: RelatieDetail,
+      },
+      {
+        path: "lading",
+        Component: Ladingen,
+      },
+      {
+        path: "lading/:id",
+        Component: LadingModuleDetail,
+      },
+      {
+        path: "crm/deals",
+        Component: Contracten,
+      },
+      {
+        path: "crm/deal/:id",
+        Component: ContractDetail,
+      },
+      {
+        path: "crm/relatie/:relatieId/lading/:id",
+        Component: CrmLadingDetail,
+      },
+      {
+        path: "crm/relatie/:relatieId/vaartuig/:id",
+        Component: CrmVaartuigDetail,
       },
       {
         path: "*",
