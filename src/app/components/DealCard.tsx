@@ -4,6 +4,7 @@ import Badge from "./Badge";
 import type { Contract } from "../data/api";
 import { CONTRACT_SOORT_LABELS } from "../data/mock-contract-data";
 import { mockRelaties, mockGebruikers } from "../data/mock-relatie-data";
+import { mockTaken } from "../data/mock-taken-data";
 
 interface DealCardProps {
   deal: Contract;
@@ -40,6 +41,7 @@ export default function DealCard({ deal }: DealCardProps) {
 
   const relatie = mockRelaties.find((r) => r.id === deal.relatieId);
   const eigenaar = mockGebruikers.find((g) => g.id === deal.eigenaarId);
+  const openTakenCount = mockTaken.filter((t) => t.contractId === deal.id && t.status === "open").length;
 
   const deadline = deal.type === "spot" ? deal.laaddatum : deal.startDatum;
   const deadlineExpired = isExpired(deadline);
@@ -106,6 +108,14 @@ export default function DealCard({ deal }: DealCardProps) {
               label={deal.type === "contract" ? "Contract" : "Spot"}
               variant="grey"
             />
+            {openTakenCount > 0 && (
+              <div className="inline-flex items-center gap-[3px] px-[6px] py-[1px] rounded-[4px] bg-[#f2f4f7]">
+                <svg className="size-[10px] text-rdj-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-sans font-bold text-[11px] text-rdj-text-secondary leading-[16px]">{openTakenCount}</span>
+              </div>
+            )}
             {eigenaar && (
               <p className="font-sans font-normal leading-[18px] text-rdj-text-secondary text-[12px]">
                 {eigenaar.naam}

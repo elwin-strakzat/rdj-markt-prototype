@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router";
 import svgPaths from "../../imports/svg-5lxjaeghl9";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
 import svgPathsMenu from "../../imports/svg-80ushx2b4a";
+import { mockTaken } from "../data/mock-taken-data";
 
 export default function Sidebar() {
   const [showMarktMenu, setShowMarktMenu] = useState(false);
@@ -184,6 +185,17 @@ export default function Sidebar() {
     { label: "Deals", path: "/crm/deals" },
   ];
 
+  // Check if current page is Taken
+  const isTakenPage = location.pathname === '/crm/taken';
+
+  // Count urgent tasks: open tasks where deadline is today or in the past, or within 2 days
+  const urgentTakenCount = useMemo(() => {
+    const twoDaysFromNow = new Date();
+    twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+    twoDaysFromNow.setHours(23, 59, 59, 999);
+    return mockTaken.filter((t) => t.status === "open" && new Date(t.deadline) <= twoDaysFromNow).length;
+  }, []);
+
   return (
     <div className="bg-rdj-bg-secondary relative shrink-0 w-[72px] h-screen sticky top-0 z-50" data-name="Sidebar navigation">
       <div className="content-stretch flex items-start justify-center overflow-clip relative rounded-[inherit] size-full">
@@ -346,6 +358,20 @@ export default function Sidebar() {
                     </div>
                   </div>
                 </div>
+                {/* Taken */}
+                <Link to="/crm/taken" className="relative shrink-0" data-name="Item">
+                  <div className={`content-stretch flex items-center justify-center p-[8px] rounded-[4px] shrink-0 size-[40px] ${isTakenPage ? 'bg-[#e3effb]' : ''}`} data-name="_Nav item button">
+                    <svg className="shrink-0 size-[24px]" fill="none" viewBox="0 0 24 24">
+                      <path d="M9 11L12 14L22 4" stroke={isTakenPage ? "#1567A4" : "#667085"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                      <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke={isTakenPage ? "#1567A4" : "#667085"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                    </svg>
+                  </div>
+                  {urgentTakenCount > 0 && (
+                    <span className="absolute -top-[4px] -right-[6px] min-w-[18px] h-[18px] rounded-full bg-[#F04438] flex items-center justify-center px-[4px] pointer-events-none">
+                      <span className="font-sans font-bold text-[10px] text-white leading-none">{urgentTakenCount}</span>
+                    </span>
+                  )}
+                </Link>
                 <div className="relative rounded-[9999px] shrink-0 size-[40px]" data-name="Avatar">
                   <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[9999px] size-full" src={imgAvatar} />
                 </div>

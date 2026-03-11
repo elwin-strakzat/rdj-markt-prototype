@@ -10,6 +10,7 @@ import Button from "../components/Button";
 import Badge from "../components/Badge";
 import RelatieFormDialog from "../components/RelatieFormDialog";
 import { mockRelaties, mockContactPersonen, mockGebruikers, LADINGGROEP_SUGGESTIES, mockRelatieCounts } from "../data/mock-relatie-data";
+import { mockTaken } from "../data/mock-taken-data";
 import type { Relatie } from "../data/api";
 
 function getInitials(name: string): string {
@@ -128,6 +129,12 @@ export default function Relaties() {
       width: "w-[130px]",
     },
     {
+      key: "takenCount",
+      header: "Taken",
+      type: "text",
+      width: "w-[80px]",
+    },
+    {
       key: "eigenaarNaam",
       header: "Eigenaar",
       type: "text",
@@ -147,6 +154,7 @@ export default function Relaties() {
     const eigenaar = mockGebruikers.find((g) => g.id === r.eigenaarId);
     const contactCount = mockContactPersonen.filter((cp) => cp.relatieId === r.id).length;
     const counts = mockRelatieCounts[r.id] || { ladingen: 0, vaartuigen: 0, onderhandelingen: 0 };
+    const openTakenCount = mockTaken.filter((t) => t.relatieId === r.id && t.status === "open").length;
     return {
       id: r.id,
       naam: r.naam,
@@ -158,6 +166,7 @@ export default function Relaties() {
       ladingenCount: String(counts.ladingen),
       vaartuigenCount: String(counts.vaartuigen),
       onderhandelingenCount: String(counts.onderhandelingen),
+      takenCount: openTakenCount > 0 ? String(openTakenCount) : "—",
       eigenaarNaam: eigenaar?.naam || "—",
       eigenaarInitials: eigenaar ? getInitials(eigenaar.naam) : undefined,
       laatsteContactLabel: formatDate(r.laatsteContact),

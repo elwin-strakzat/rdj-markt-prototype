@@ -3,6 +3,7 @@ import { mockContracten } from "../data/mock-contract-data";
 import { mockRelatieLadingen, mockRelatieVaartuigen, mockMailConversaties, mockGespreksverslagen } from "../data/mock-relatie-data";
 import type { RelatieLading, MailConversatie, Gespreksverslag } from "../data/mock-relatie-data";
 import type { RelatieVaartuig } from "../data/mock-relatie-data";
+import TakenList from "./TakenList";
 
 interface RelatieOverzichtTabProps {
   relatie: Relatie;
@@ -175,25 +176,8 @@ export default function RelatieOverzichtTab({ relatie, contactPersonen }: Relati
         </div>
       </div>
 
-      {/* Taken (placeholder) */}
-      <div>
-        <div className="flex items-center justify-between mb-[12px]">
-          <div className="flex items-center gap-[8px]">
-            <p className="font-sans font-bold text-[16px] leading-[24px] text-rdj-text-primary">Taken</p>
-            <span className="inline-flex items-center justify-center min-w-[20px] h-[20px] rounded-full px-[6px] bg-[#f2f4f7] font-sans font-bold text-[12px] leading-[16px] text-rdj-text-secondary">
-              0
-            </span>
-          </div>
-          <button className="font-sans font-bold text-[14px] leading-[20px] text-rdj-text-brand hover:underline">
-            + Taak toevoegen
-          </button>
-        </div>
-        <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
-          <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
-            Nog geen openstaande taken voor deze relatie.
-          </p>
-        </div>
-      </div>
+      {/* Taken */}
+      <TakenList relatieId={relatie.id} showDeal compact />
 
       {/* Contactpersonen */}
       <div>

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import DetailRow from "./DetailRow";
 import ContactPersonenSection from "./ContactPersonenSection";
+import TakenList from "./TakenList";
 import type { Relatie, ContactPersoon } from "../data/api";
 import { mockGebruikers } from "../data/mock-relatie-data";
+import { mockTaken } from "../data/mock-taken-data";
 
 interface RelatieDetailSidebarProps {
   relatie: Relatie;
@@ -23,8 +25,12 @@ function formatDate(dateStr?: string): string {
 }
 
 export default function RelatieDetailSidebar({ relatie, contactPersonen }: RelatieDetailSidebarProps) {
-  const [activeTab, setActiveTab] = useState<"details" | "contactpersonen">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "contactpersonen" | "taken">("details");
   const eigenaar = mockGebruikers.find((g) => g.id === relatie.eigenaarId);
+  const openTakenCount = useMemo(
+    () => mockTaken.filter((t) => t.relatieId === relatie.id && t.status === "open").length,
+    [relatie.id]
+  );
 
   return (
     <div className="shrink-0 w-[380px] border-l border-rdj-border-secondary bg-white sticky top-0 h-screen overflow-y-auto">
@@ -55,6 +61,23 @@ export default function RelatieDetailSidebar({ relatie, contactPersonen }: Relat
             }`}>
               {contactPersonen.length}
             </span>
+          </button>
+          <button
+            onClick={() => setActiveTab("taken")}
+            className={`pb-[12px] px-[4px] font-sans font-bold text-[14px] leading-[20px] flex items-center gap-[6px] ${
+              activeTab === "taken"
+                ? "text-rdj-text-brand border-b-2 border-[#1567a4]"
+                : "text-rdj-text-tertiary"
+            }`}
+          >
+            Taken
+            {openTakenCount > 0 && (
+              <span className={`inline-flex items-center justify-center min-w-[20px] h-[20px] rounded-full px-[6px] font-sans font-bold text-[12px] leading-[16px] ${
+                activeTab === "taken" ? "bg-[#e3effb] text-rdj-text-brand" : "bg-[#f2f4f7] text-rdj-text-tertiary"
+              }`}>
+                {openTakenCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -119,6 +142,10 @@ export default function RelatieDetailSidebar({ relatie, contactPersonen }: Relat
 
         {activeTab === "contactpersonen" && (
           <ContactPersonenSection relatieId={relatie.id} contactPersonen={contactPersonen} />
+        )}
+
+        {activeTab === "taken" && (
+          <TakenList relatieId={relatie.id} showDeal compact />
         )}
       </div>
     </div>
