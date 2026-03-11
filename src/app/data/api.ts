@@ -262,6 +262,48 @@ export interface Bod {
   status: string;
 }
 
+// ── CRM Contract types ──
+
+export type ContractType = "spot" | "contract";
+export type ContractSoort = "bevrachting" | "verhuur_duwbak" | "op_overslag" | "inspectie_goederen";
+export type ContractStatus = "aandacht_nodig" | "in_onderhandeling" | "gewonnen" | "verloren";
+
+export interface ContractRoute {
+  id: string;
+  laadhavenNaam: string;
+  loshavenNaam: string;
+  tonnage?: number;
+  vrachtprijs?: number;
+}
+
+export interface Contract {
+  id: string;
+  titel: string;
+  relatieId: string;
+  contactPersoonId?: string;
+  eigenaarId?: string;
+  type: ContractType;
+  soort: ContractSoort;
+  status: ContractStatus;
+  verlorenReden?: string;
+  waarde?: number;
+  // Spot
+  laadhavenNaam?: string;
+  loshavenNaam?: string;
+  tonnage?: number;
+  vrachtprijs?: number;
+  laaddatum?: string;
+  losdatum?: string;
+  // Contract
+  startDatum?: string;
+  eindDatum?: string;
+  routes?: ContractRoute[];
+  // Meta
+  aanmaakDatum: string;
+  laatsteUpdate: string;
+  opmerkingen?: string;
+}
+
 // ── CRUD operations ──
 
 /** List all items of an entity type */

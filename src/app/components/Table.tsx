@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState } from "react";
 import Checkbox from "./Checkbox";
 import FeaturedIcon from "./FeaturedIcon";
 import Badge, { type BadgeVariant } from "./Badge";
@@ -102,6 +102,8 @@ export interface BadgesColumn extends BaseColumn {
   variantsKey?: string;
   /** Default variant for all badges */
   defaultVariant?: BadgeVariant;
+  /** Max badges to show before "+X" overflow (default 2) */
+  maxVisible?: number;
 }
 
 export interface StatusColumn extends BaseColumn {
@@ -409,59 +411,14 @@ function CellBadges({ row, col }: { row: RowData; col: BadgesColumn }) {
       ? row[col.variantsKey]
       : items.map(() => col.defaultVariant ?? "grey");
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleCount, setVisibleCount] = useState(items.length);
-
-  useLayoutEffect(() => {
-    const container = containerRef.current;
-    if (!container || items.length === 0) {
-      setVisibleCount(items.length);
-      return;
-    }
-
-    // Temporarily show all children to measure
-    const children = Array.from(container.children) as HTMLElement[];
-    children.forEach((c) => (c.style.display = ""));
-
-    const containerWidth = container.offsetWidth;
-    const gap = 4;
-    // Estimate the "+N" badge width (~32px)
-    const overflowBadgeWidth = 32;
-
-    let usedWidth = 0;
-    let fits = 0;
-
-    for (let i = 0; i < items.length; i++) {
-      const child = children[i];
-      if (!child) break;
-      const childWidth = child.offsetWidth;
-      const totalIfAdded = usedWidth + (i > 0 ? gap : 0) + childWidth;
-
-      // If this is the last item and it fits, include it
-      if (i === items.length - 1 && totalIfAdded <= containerWidth) {
-        fits = i + 1;
-        break;
-      }
-
-      // Check if this item + the overflow badge would fit
-      const totalWithOverflow = totalIfAdded + gap + overflowBadgeWidth;
-      if (totalWithOverflow > containerWidth && i < items.length - 1) {
-        break;
-      }
-
-      usedWidth = totalIfAdded;
-      fits = i + 1;
-    }
-
-    setVisibleCount(fits);
-  }, [items]);
-
+  const maxVisible = col.maxVisible ?? 2;
+  const visibleCount = items.length <= maxVisible ? items.length : maxVisible;
   const overflow = items.length - visibleCount;
 
   return (
-    <div ref={containerRef} className="flex items-center gap-[4px] overflow-hidden">
-      {items.map((badge, idx) => (
-        <div key={idx} className="shrink-0" style={idx >= visibleCount ? { display: "none" } : undefined}>
+    <div className="flex items-center gap-[4px] flex-wrap">
+      {items.slice(0, visibleCount).map((badge, idx) => (
+        <div key={idx} className="shrink-0">
           <Badge label={badge} variant={variants[idx] ?? "grey"} />
         </div>
       ))}

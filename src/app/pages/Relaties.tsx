@@ -9,7 +9,7 @@ import FilterDropdown from "../components/FilterDropdown";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
 import RelatieFormDialog from "../components/RelatieFormDialog";
-import { mockRelaties, mockContactPersonen, mockGebruikers, LADINGGROEP_SUGGESTIES } from "../data/mock-relatie-data";
+import { mockRelaties, mockContactPersonen, mockGebruikers, LADINGGROEP_SUGGESTIES, mockRelatieCounts } from "../data/mock-relatie-data";
 import type { Relatie } from "../data/api";
 
 function getInitials(name: string): string {
@@ -44,9 +44,9 @@ const statusVariantMap: Record<string, string> = {
 export default function Relaties() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("Alle");
-  const [ladingGroepFilter, setLadingGroepFilter] = useState("Alle");
-  const [eigenaarFilter, setEigenaarFilter] = useState("Alle");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [ladingGroepFilter, setLadingGroepFilter] = useState<string[]>([]);
+  const [eigenaarFilter, setEigenaarFilter] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
@@ -54,22 +54,22 @@ export default function Relaties() {
   const [relaties, setRelaties] = useState<Relatie[]>(mockRelaties);
 
   const eigenaarOptions = useMemo(
-    () => ["Alle", ...mockGebruikers.map((g) => g.naam)],
+    () => ["Alle eigenaren", ...mockGebruikers.map((g) => g.naam)],
     []
   );
   const ladingGroepOptions = useMemo(
-    () => ["Alle", ...LADINGGROEP_SUGGESTIES],
+    () => ["Alle ladinggroepen", ...LADINGGROEP_SUGGESTIES],
     []
   );
 
   const filtered = useMemo(() => {
     return relaties.filter((r) => {
       if (search && !r.naam.toLowerCase().includes(search.toLowerCase())) return false;
-      if (statusFilter !== "Alle" && r.status !== statusFilter.toLowerCase()) return false;
-      if (ladingGroepFilter !== "Alle" && !(r.ladingGroepen || []).includes(ladingGroepFilter)) return false;
-      if (eigenaarFilter !== "Alle") {
-        const eigenaar = mockGebruikers.find((g) => g.naam === eigenaarFilter);
-        if (!eigenaar || r.eigenaarId !== eigenaar.id) return false;
+      if (statusFilter.length > 0 && r.status && !statusFilter.map((s) => s.toLowerCase()).includes(r.status)) return false;
+      if (ladingGroepFilter.length > 0 && !(r.ladingGroepen || []).some((g) => ladingGroepFilter.includes(g))) return false;
+      if (eigenaarFilter.length > 0) {
+        const eigenaar = mockGebruikers.find((g) => g.id === r.eigenaarId);
+        if (!eigenaar || !eigenaarFilter.includes(eigenaar.naam)) return false;
       }
       return true;
     });
@@ -110,6 +110,24 @@ export default function Relaties() {
       width: "w-[100px]",
     },
     {
+      key: "ladingenCount",
+      header: "Ladingen",
+      type: "text",
+      width: "w-[100px]",
+    },
+    {
+      key: "vaartuigenCount",
+      header: "Vaartuigen",
+      type: "text",
+      width: "w-[100px]",
+    },
+    {
+      key: "onderhandelingenCount",
+      header: "Onderhandelingen",
+      type: "text",
+      width: "w-[130px]",
+    },
+    {
       key: "eigenaarNaam",
       header: "Eigenaar",
       type: "text",
@@ -128,6 +146,7 @@ export default function Relaties() {
   const tableData: RowData[] = paged.map((r) => {
     const eigenaar = mockGebruikers.find((g) => g.id === r.eigenaarId);
     const contactCount = mockContactPersonen.filter((cp) => cp.relatieId === r.id).length;
+    const counts = mockRelatieCounts[r.id] || { ladingen: 0, vaartuigen: 0, onderhandelingen: 0 };
     return {
       id: r.id,
       naam: r.naam,
@@ -136,6 +155,9 @@ export default function Relaties() {
       statusVariant: statusVariantMap[r.status || ""] || "grey",
       ladingGroepen: r.ladingGroepen || [],
       contactCount: String(contactCount),
+      ladingenCount: String(counts.ladingen),
+      vaartuigenCount: String(counts.vaartuigen),
+      onderhandelingenCount: String(counts.onderhandelingen),
       eigenaarNaam: eigenaar?.naam || "—",
       eigenaarInitials: eigenaar ? getInitials(eigenaar.naam) : undefined,
       laatsteContactLabel: formatDate(r.laatsteContact),
@@ -178,21 +200,24 @@ export default function Relaties() {
               <>
                 <FilterDropdown
                   label="Status"
-                  options={["Alle", "Actief", "Inactief", "Prospect"]}
-                  value={statusFilter}
-                  onSelect={(v) => { setStatusFilter(v); setCurrentPage(1); }}
+                  options={["Alle statussen", "Actief", "Inactief", "Prospect"]}
+                  allLabel="Alle statussen"
+                  selectedValues={statusFilter}
+                  onMultiSelect={(v) => { setStatusFilter(v); setCurrentPage(1); }}
                 />
                 <FilterDropdown
                   label="Ladinggroep"
                   options={ladingGroepOptions}
-                  value={ladingGroepFilter}
-                  onSelect={(v) => { setLadingGroepFilter(v); setCurrentPage(1); }}
+                  allLabel="Alle ladinggroepen"
+                  selectedValues={ladingGroepFilter}
+                  onMultiSelect={(v) => { setLadingGroepFilter(v); setCurrentPage(1); }}
                 />
                 <FilterDropdown
                   label="Eigenaar"
                   options={eigenaarOptions}
-                  value={eigenaarFilter}
-                  onSelect={(v) => { setEigenaarFilter(v); setCurrentPage(1); }}
+                  allLabel="Alle eigenaren"
+                  selectedValues={eigenaarFilter}
+                  onMultiSelect={(v) => { setEigenaarFilter(v); setCurrentPage(1); }}
                 />
               </>
             }

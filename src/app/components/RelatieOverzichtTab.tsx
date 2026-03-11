@@ -1,10 +1,13 @@
+import { useNavigate } from "react-router";
 import type { Relatie, ContactPersoon } from "../data/api";
-import { mockGebruikers } from "../data/mock-relatie-data";
+import { mockContracten, CONTRACT_STATUS_LABELS, CONTRACT_STATUS_VARIANT_MAP } from "../data/mock-contract-data";
+import { mockRelatieLadingen, mockRelatieVaartuigen } from "../data/mock-relatie-data";
+import Badge from "./Badge";
 
 interface RelatieOverzichtTabProps {
   relatie: Relatie;
   contactPersonen: ContactPersoon[];
-  onTabChange: (tab: "overzicht" | "ladingen" | "vaartuigen" | "onderhandelingen" | "activiteit") => void;
+  onTabChange: (tab: "overzicht" | "ladingen" | "vaartuigen" | "spot" | "contracten" | "activiteit") => void;
 }
 
 function SectionHeader({ title, count, onViewAll }: { title: string; count?: number; onViewAll?: () => void }) {
@@ -27,41 +30,28 @@ function SectionHeader({ title, count, onViewAll }: { title: string; count?: num
   );
 }
 
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
+}
+
+const ladingStatusMap: Record<string, { label: string; variant: "success" | "warning" | "brand" | "grey" }> = {
+  intake: { label: "Intake", variant: "brand" },
+  werklijst: { label: "Werklijst", variant: "warning" },
+  markt: { label: "In de markt", variant: "success" },
+  gesloten: { label: "Gesloten", variant: "grey" },
+};
+
 export default function RelatieOverzichtTab({ relatie, contactPersonen, onTabChange }: RelatieOverzichtTabProps) {
-  const eigenaar = mockGebruikers.find((g) => g.id === relatie.eigenaarId);
+  const navigate = useNavigate();
+  const relatieSpot = mockContracten.filter((c) => c.relatieId === relatie.id && c.type === "spot");
+  const relatieContracten = mockContracten.filter((c) => c.relatieId === relatie.id && c.type === "contract");
+  const relatieLadingen = mockRelatieLadingen.filter((l) => l.relatieId === relatie.id);
+  const relatieVaartuigen = mockRelatieVaartuigen.filter((v) => v.relatieId === relatie.id);
 
   return (
     <div className="w-full px-[24px] flex flex-col gap-[32px] pb-[32px]">
-      {/* Samenvatting */}
-      <div className="bg-[#f9fafb] rounded-[8px] p-[20px]">
-        <div className="grid grid-cols-4 gap-[16px]">
-          <div>
-            <p className="font-sans font-normal text-[12px] leading-[18px] text-rdj-text-secondary uppercase tracking-[0.04em]">Status</p>
-            <p className="font-sans font-bold text-[14px] leading-[20px] text-rdj-text-primary mt-[4px]">
-              {relatie.status ? relatie.status.charAt(0).toUpperCase() + relatie.status.slice(1) : "—"}
-            </p>
-          </div>
-          <div>
-            <p className="font-sans font-normal text-[12px] leading-[18px] text-rdj-text-secondary uppercase tracking-[0.04em]">Eigenaar</p>
-            <p className="font-sans font-bold text-[14px] leading-[20px] text-rdj-text-primary mt-[4px]">
-              {eigenaar?.naam || "—"}
-            </p>
-          </div>
-          <div>
-            <p className="font-sans font-normal text-[12px] leading-[18px] text-rdj-text-secondary uppercase tracking-[0.04em]">Contacten</p>
-            <p className="font-sans font-bold text-[14px] leading-[20px] text-rdj-text-primary mt-[4px]">
-              {contactPersonen.length}
-            </p>
-          </div>
-          <div>
-            <p className="font-sans font-normal text-[12px] leading-[18px] text-rdj-text-secondary uppercase tracking-[0.04em]">Ladinggroepen</p>
-            <p className="font-sans font-bold text-[14px] leading-[20px] text-rdj-text-primary mt-[4px]">
-              {relatie.ladingGroepen?.join(", ") || "—"}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Contactpersonen */}
       <div>
         <SectionHeader title="Contactpersonen" count={contactPersonen.length} />
@@ -95,32 +85,192 @@ export default function RelatieOverzichtTab({ relatie, contactPersonen, onTabCha
 
       {/* Ladingen */}
       <div>
-        <SectionHeader title="Ladingen" count={0} onViewAll={() => onTabChange("ladingen")} />
-        <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
-          <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
-            Nog geen ladingen gekoppeld aan deze relatie.
-          </p>
-        </div>
+        <SectionHeader title="Ladingen" count={relatieLadingen.length} onViewAll={() => onTabChange("ladingen")} />
+        {relatieLadingen.length === 0 ? (
+          <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
+            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+              Nog geen ladingen gekoppeld aan deze relatie.
+            </p>
+          </div>
+        ) : (
+          <div className="border border-rdj-border-secondary rounded-[8px] overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-rdj-border-secondary bg-[#f9fafb]">
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Lading</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Route</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Laaddatum</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Matches</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {relatieLadingen.slice(0, 3).map((l) => {
+                  const s = ladingStatusMap[l.status] || { label: l.status, variant: "grey" as const };
+                  return (
+                    <tr
+                      key={l.id}
+                      className="border-b border-rdj-border-secondary last:border-b-0 hover:bg-[#f9fafb] cursor-pointer transition-colors"
+                      onClick={() => navigate(`/crm/relatie/${relatie.id}/lading/${l.id}`)}
+                    >
+                      <td className="px-[12px] py-[10px]">
+                        <p className="font-sans font-bold text-[14px] text-rdj-text-primary">{l.titel}</p>
+                        <p className="font-sans font-normal text-[12px] text-rdj-text-secondary">{l.tonnage} {l.product}</p>
+                      </td>
+                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{l.laadhaven} → {l.loshaven}</td>
+                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{formatDate(l.laaddatum)}</td>
+                      <td className="px-[12px] py-[10px]">
+                        {l.matches > 0 ? (
+                          <span className="font-sans font-bold text-[13px] text-rdj-text-brand">{l.matches}</span>
+                        ) : (
+                          <span className="font-sans font-normal text-[13px] text-rdj-text-tertiary">—</span>
+                        )}
+                      </td>
+                      <td className="px-[12px] py-[10px]">
+                        <Badge label={s.label} variant={s.variant} dot />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Vaartuigen */}
       <div>
-        <SectionHeader title="Vaartuigen" count={0} onViewAll={() => onTabChange("vaartuigen")} />
-        <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
-          <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
-            Nog geen vaartuigen gekoppeld aan deze relatie.
-          </p>
-        </div>
+        <SectionHeader title="Vaartuigen" count={relatieVaartuigen.length} onViewAll={() => onTabChange("vaartuigen")} />
+        {relatieVaartuigen.length === 0 ? (
+          <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
+            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+              Nog geen vaartuigen gekoppeld aan deze relatie.
+            </p>
+          </div>
+        ) : (
+          <div className="border border-rdj-border-secondary rounded-[8px] overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-rdj-border-secondary bg-[#f9fafb]">
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Vaartuig</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Type</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Capaciteit</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Matches</th>
+                </tr>
+              </thead>
+              <tbody>
+                {relatieVaartuigen.slice(0, 3).map((v) => (
+                  <tr
+                    key={v.id}
+                    className="border-b border-rdj-border-secondary last:border-b-0 hover:bg-[#f9fafb] cursor-pointer transition-colors"
+                    onClick={() => navigate(`/crm/relatie/${relatie.id}/vaartuig/${v.id}`)}
+                  >
+                    <td className="px-[12px] py-[10px] font-sans font-bold text-[14px] text-rdj-text-primary">{v.naam}</td>
+                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-secondary">{v.type}</td>
+                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{v.capaciteit}</td>
+                    <td className="px-[12px] py-[10px]">
+                      {v.matches > 0 ? (
+                        <span className="font-sans font-bold text-[13px] text-rdj-text-brand">{v.matches}</span>
+                      ) : (
+                        <span className="font-sans font-normal text-[13px] text-rdj-text-tertiary">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Onderhandelingen */}
+      {/* Spot */}
       <div>
-        <SectionHeader title="Onderhandelingen" count={0} onViewAll={() => onTabChange("onderhandelingen")} />
-        <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
-          <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
-            Nog geen onderhandelingen voor deze relatie.
-          </p>
-        </div>
+        <SectionHeader title="Spot" count={relatieSpot.length} onViewAll={() => onTabChange("spot")} />
+        {relatieSpot.length === 0 ? (
+          <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
+            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+              Nog geen spot deals voor deze relatie.
+            </p>
+          </div>
+        ) : (
+          <div className="border border-rdj-border-secondary rounded-[8px] overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-rdj-border-secondary bg-[#f9fafb]">
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Titel</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Route</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Status</th>
+                  <th className="text-right px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Waarde</th>
+                </tr>
+              </thead>
+              <tbody>
+                {relatieSpot.slice(0, 3).map((c) => (
+                  <tr key={c.id} className="border-b border-rdj-border-secondary last:border-b-0">
+                    <td className="px-[12px] py-[10px] font-sans font-bold text-[14px] text-rdj-text-primary">{c.titel}</td>
+                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-secondary">
+                      {[c.laadhavenNaam, c.loshavenNaam].filter(Boolean).join(" → ") || "—"}
+                    </td>
+                    <td className="px-[12px] py-[10px]">
+                      <Badge
+                        label={CONTRACT_STATUS_LABELS[c.status] || "—"}
+                        variant={(CONTRACT_STATUS_VARIANT_MAP[c.status] || "grey") as "success" | "warning" | "error" | "brand" | "grey"}
+                        dot
+                      />
+                    </td>
+                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary text-right">
+                      {c.waarde ? new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(c.waarde) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Contracten */}
+      <div>
+        <SectionHeader title="Contracten" count={relatieContracten.length} onViewAll={() => onTabChange("contracten")} />
+        {relatieContracten.length === 0 ? (
+          <div className="border border-rdj-border-secondary rounded-[8px] p-[24px] text-center">
+            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+              Nog geen contracten voor deze relatie.
+            </p>
+          </div>
+        ) : (
+          <div className="border border-rdj-border-secondary rounded-[8px] overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-rdj-border-secondary bg-[#f9fafb]">
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Titel</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Status</th>
+                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Periode</th>
+                  <th className="text-right px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Waarde</th>
+                </tr>
+              </thead>
+              <tbody>
+                {relatieContracten.slice(0, 3).map((c) => (
+                  <tr key={c.id} className="border-b border-rdj-border-secondary last:border-b-0">
+                    <td className="px-[12px] py-[10px] font-sans font-bold text-[14px] text-rdj-text-primary">{c.titel}</td>
+                    <td className="px-[12px] py-[10px]">
+                      <Badge
+                        label={CONTRACT_STATUS_LABELS[c.status] || "—"}
+                        variant={(CONTRACT_STATUS_VARIANT_MAP[c.status] || "grey") as "success" | "warning" | "error" | "brand" | "grey"}
+                        dot
+                      />
+                    </td>
+                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">
+                      {c.startDatum && c.eindDatum ? `${formatDate(c.startDatum)} – ${formatDate(c.eindDatum)}` : "—"}
+                    </td>
+                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary text-right">
+                      {c.waarde ? new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(c.waarde) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,10 @@ import Onderhandelingen from "./pages/Onderhandelingen";
 import DatabaseAdmin from "./pages/DatabaseAdmin";
 import Relaties from "./pages/Relaties";
 import RelatieDetail from "./pages/RelatieDetail";
+import Contracten from "./pages/Contracten";
+import ContractDetail from "./pages/ContractDetail";
+import CrmLadingDetail from "./pages/CrmLadingDetail";
+import CrmVaartuigDetail from "./pages/CrmVaartuigDetail";
 
 function RootLayout() {
   return <Outlet />;
@@ -182,6 +186,22 @@ export const router = createBrowserRouter([
       {
         path: "crm/relatie/:id",
         Component: RelatieDetail,
+      },
+      {
+        path: "crm/deals",
+        Component: Contracten,
+      },
+      {
+        path: "crm/deal/:id",
+        Component: ContractDetail,
+      },
+      {
+        path: "crm/relatie/:relatieId/lading/:id",
+        Component: CrmLadingDetail,
+      },
+      {
+        path: "crm/relatie/:relatieId/vaartuig/:id",
+        Component: CrmVaartuigDetail,
       },
       {
         path: "*",

@@ -9,7 +9,8 @@ import ActivityFeed from "../components/ActivityFeed";
 import RelatieDetailSidebar from "../components/RelatieDetailSidebar";
 import RelatieOverzichtTab from "../components/RelatieOverzichtTab";
 import RelatieFormDialog from "../components/RelatieFormDialog";
-import { mockRelaties, mockContactPersonen } from "../data/mock-relatie-data";
+import { mockRelaties, mockContactPersonen, mockRelatieLadingen, mockRelatieVaartuigen, VAARTUIG_STATUS_MAP } from "../data/mock-relatie-data";
+import { mockContracten, CONTRACT_STATUS_LABELS, CONTRACT_STATUS_VARIANT_MAP } from "../data/mock-contract-data";
 import type { Relatie } from "../data/api";
 
 const statusVariantMap: Record<string, "success" | "grey" | "brand"> = {
@@ -17,6 +18,26 @@ const statusVariantMap: Record<string, "success" | "grey" | "brand"> = {
   inactief: "grey",
   prospect: "brand",
 };
+
+const ladingStatusMap: Record<string, { label: string; variant: "success" | "warning" | "brand" | "grey" }> = {
+  intake: { label: "Intake", variant: "brand" },
+  werklijst: { label: "Werklijst", variant: "warning" },
+  markt: { label: "In de markt", variant: "success" },
+  gesloten: { label: "Gesloten", variant: "grey" },
+};
+
+const vaartuigStatusMap: Record<string, { label: string; variant: "success" | "warning" | "brand" | "grey" }> = {
+  beschikbaar: { label: "Beschikbaar", variant: "success" },
+  onderweg: { label: "Onderweg", variant: "brand" },
+  beladen: { label: "Beladen", variant: "warning" },
+  in_onderhoud: { label: "In onderhoud", variant: "grey" },
+};
+
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
+}
 
 const chevronSvg = (
   <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 5.33333 9.33333">
@@ -27,13 +48,29 @@ const chevronSvg = (
 export default function RelatieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"overzicht" | "ladingen" | "vaartuigen" | "onderhandelingen" | "activiteit">("overzicht");
+  const [activeTab, setActiveTab] = useState<"overzicht" | "ladingen" | "vaartuigen" | "spot" | "contracten" | "activiteit">("overzicht");
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [relaties, setRelaties] = useState<Relatie[]>(mockRelaties);
 
   const relatie = useMemo(() => relaties.find((r) => r.id === id), [relaties, id]);
   const contactPersonen = useMemo(
     () => mockContactPersonen.filter((cp) => cp.relatieId === id),
+    [id]
+  );
+  const relatieContracten = useMemo(
+    () => mockContracten.filter((c) => c.relatieId === id && c.type === "contract"),
+    [id]
+  );
+  const relatieSpot = useMemo(
+    () => mockContracten.filter((c) => c.relatieId === id && c.type === "spot"),
+    [id]
+  );
+  const relatieLadingen = useMemo(
+    () => mockRelatieLadingen.filter((l) => l.relatieId === id),
+    [id]
+  );
+  const relatieVaartuigen = useMemo(
+    () => mockRelatieVaartuigen.filter((v) => v.relatieId === id),
     [id]
   );
 
@@ -101,9 +138,10 @@ export default function RelatieDetail() {
 
   const tabs: PageTab[] = [
     { label: "Overzicht", path: "#overzicht", isActive: activeTab === "overzicht" },
-    { label: "Ladingen", path: "#ladingen", isActive: activeTab === "ladingen", badge: "0" },
-    { label: "Vaartuigen", path: "#vaartuigen", isActive: activeTab === "vaartuigen", badge: "0" },
-    { label: "Onderhandelingen", path: "#onderhandelingen", isActive: activeTab === "onderhandelingen", badge: "0" },
+    { label: "Ladingen", path: "#ladingen", isActive: activeTab === "ladingen", badge: String(relatieLadingen.length) },
+    { label: "Vaartuigen", path: "#vaartuigen", isActive: activeTab === "vaartuigen", badge: String(relatieVaartuigen.length) },
+    { label: "Spot", path: "#spot", isActive: activeTab === "spot", badge: String(relatieSpot.length) },
+    { label: "Contracten", path: "#contracten", isActive: activeTab === "contracten", badge: String(relatieContracten.length) },
     { label: "Activiteit", path: "#activiteit", isActive: activeTab === "activiteit" },
   ];
 
@@ -155,26 +193,221 @@ export default function RelatieDetail() {
                     )}
 
                     {activeTab === "ladingen" && (
-                      <div className="w-full px-[24px] py-[48px] text-center">
-                        <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
-                          Nog geen ladingen gekoppeld aan deze relatie.
-                        </p>
+                      <div className="w-full px-[24px] pb-[32px]">
+                        {relatieLadingen.length === 0 ? (
+                          <div className="py-[48px] text-center">
+                            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+                              Nog geen ladingen gekoppeld aan deze relatie.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="border border-rdj-border-secondary rounded-[8px] overflow-hidden">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-rdj-border-secondary bg-[#f9fafb]">
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Lading</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Route</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Tonnage</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Laaddatum</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Matches</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {relatieLadingen.map((l) => {
+                                  const s = ladingStatusMap[l.status] || { label: l.status, variant: "grey" as const };
+                                  return (
+                                    <tr
+                                      key={l.id}
+                                      className="border-b border-rdj-border-secondary last:border-b-0 hover:bg-[#f9fafb] cursor-pointer transition-colors"
+                                      onClick={() => navigate(`/crm/relatie/${id}/lading/${l.id}`)}
+                                    >
+                                      <td className="px-[12px] py-[10px]">
+                                        <p className="font-sans font-bold text-[14px] text-rdj-text-primary">{l.titel}</p>
+                                        <p className="font-sans font-normal text-[12px] text-rdj-text-secondary">{l.product}</p>
+                                      </td>
+                                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{l.laadhaven} → {l.loshaven}</td>
+                                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{l.tonnage}</td>
+                                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{formatDate(l.laaddatum)}</td>
+                                      <td className="px-[12px] py-[10px]">
+                                        {l.matches > 0 ? (
+                                          <span className="inline-flex items-center gap-[4px] font-sans font-bold text-[13px] text-rdj-text-brand">
+                                            {l.matches} match{l.matches !== 1 ? "es" : ""}
+                                          </span>
+                                        ) : (
+                                          <span className="font-sans font-normal text-[13px] text-rdj-text-tertiary">—</span>
+                                        )}
+                                      </td>
+                                      <td className="px-[12px] py-[10px]">
+                                        <Badge label={s.label} variant={s.variant} dot />
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     )}
 
                     {activeTab === "vaartuigen" && (
-                      <div className="w-full px-[24px] py-[48px] text-center">
-                        <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
-                          Nog geen vaartuigen gekoppeld aan deze relatie.
-                        </p>
+                      <div className="w-full px-[24px] pb-[32px]">
+                        {relatieVaartuigen.length === 0 ? (
+                          <div className="py-[48px] text-center">
+                            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+                              Nog geen vaartuigen gekoppeld aan deze relatie.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="border border-rdj-border-secondary rounded-[8px] overflow-hidden">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-rdj-border-secondary bg-[#f9fafb]">
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Vaartuig</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Type</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Capaciteit</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Locatie</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Matches</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {relatieVaartuigen.map((v) => {
+                                  const s = vaartuigStatusMap[v.status] || { label: v.status, variant: "grey" as const };
+                                  return (
+                                    <tr
+                                      key={v.id}
+                                      className="border-b border-rdj-border-secondary last:border-b-0 hover:bg-[#f9fafb] cursor-pointer transition-colors"
+                                      onClick={() => navigate(`/crm/relatie/${id}/vaartuig/${v.id}`)}
+                                    >
+                                      <td className="px-[12px] py-[10px] font-sans font-bold text-[14px] text-rdj-text-primary">{v.naam}</td>
+                                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-secondary">{v.type}</td>
+                                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{v.capaciteit}</td>
+                                      <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">{v.locatie}</td>
+                                      <td className="px-[12px] py-[10px]">
+                                        {v.matches > 0 ? (
+                                          <span className="inline-flex items-center gap-[4px] font-sans font-bold text-[13px] text-rdj-text-brand">
+                                            {v.matches} match{v.matches !== 1 ? "es" : ""}
+                                          </span>
+                                        ) : (
+                                          <span className="font-sans font-normal text-[13px] text-rdj-text-tertiary">—</span>
+                                        )}
+                                      </td>
+                                      <td className="px-[12px] py-[10px]">
+                                        <Badge label={s.label} variant={s.variant} dot />
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {activeTab === "onderhandelingen" && (
-                      <div className="w-full px-[24px] py-[48px] text-center">
-                        <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
-                          Nog geen onderhandelingen voor deze relatie.
-                        </p>
+                    {activeTab === "spot" && (
+                      <div className="w-full px-[24px] pb-[32px]">
+                        {relatieSpot.length === 0 ? (
+                          <div className="py-[48px] text-center">
+                            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+                              Nog geen spot deals voor deze relatie.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-[16px]">
+                            {relatieSpot.map((c) => (
+                              <div
+                                key={c.id}
+                                className="border border-rdj-border-secondary rounded-[8px] p-[16px] hover:bg-[#f9fafb] cursor-pointer transition-colors"
+                                onClick={() => navigate(`/crm/deal/${c.id}`)}
+                              >
+                                <div className="flex items-center justify-between mb-[8px]">
+                                  <div className="flex items-center gap-[8px]">
+                                    <p className="font-sans font-bold text-[14px] text-rdj-text-primary">{c.titel}</p>
+                                    <Badge
+                                      label={CONTRACT_STATUS_LABELS[c.status] || "—"}
+                                      variant={(CONTRACT_STATUS_VARIANT_MAP[c.status] || "grey") as "success" | "warning" | "error" | "brand" | "grey"}
+                                      dot
+                                    />
+                                  </div>
+                                  <p className="font-sans font-bold text-[14px] text-rdj-text-primary">
+                                    {c.waarde ? new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(c.waarde) : "—"}
+                                  </p>
+                                </div>
+                                <p className="font-sans font-normal text-[13px] text-rdj-text-secondary">
+                                  {[c.laadhavenNaam, c.loshavenNaam].filter(Boolean).join(" → ")}
+                                  {c.tonnage ? ` · ${c.tonnage.toLocaleString("nl-NL")} ton` : ""}
+                                </p>
+                                {/* Markt link */}
+                                <div className="mt-[10px] pt-[10px] border-t border-rdj-border-secondary">
+                                  <Link
+                                    to="/markt/pijplijn"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="font-sans font-bold text-[12px] text-rdj-text-brand hover:underline"
+                                  >
+                                    Bekijk in Markt →
+                                  </Link>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === "contracten" && (
+                      <div className="w-full px-[24px] pb-[32px]">
+                        {relatieContracten.length === 0 ? (
+                          <div className="py-[48px] text-center">
+                            <p className="font-sans font-normal text-[14px] text-rdj-text-tertiary">
+                              Nog geen contracten voor deze relatie.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="border border-rdj-border-secondary rounded-[8px] overflow-hidden">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-rdj-border-secondary bg-[#f9fafb]">
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Titel</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Status</th>
+                                  <th className="text-left px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Periode</th>
+                                  <th className="text-right px-[12px] py-[8px] font-sans font-bold text-[12px] text-rdj-text-secondary">Waarde</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {relatieContracten.map((c) => (
+                                  <tr
+                                    key={c.id}
+                                    className="border-b border-rdj-border-secondary last:border-b-0 hover:bg-[#f9fafb] cursor-pointer transition-colors"
+                                    onClick={() => navigate(`/crm/deal/${c.id}`)}
+                                  >
+                                    <td className="px-[12px] py-[10px]">
+                                      <p className="font-sans font-bold text-[14px] text-rdj-text-primary">{c.titel}</p>
+                                      <p className="font-sans font-normal text-[12px] text-rdj-text-secondary">
+                                        {c.routes && c.routes.length > 0 ? `${c.routes.length} route${c.routes.length > 1 ? "s" : ""}` : "—"}
+                                      </p>
+                                    </td>
+                                    <td className="px-[12px] py-[10px]">
+                                      <Badge
+                                        label={CONTRACT_STATUS_LABELS[c.status] || "—"}
+                                        variant={(CONTRACT_STATUS_VARIANT_MAP[c.status] || "grey") as "success" | "warning" | "error" | "brand" | "grey"}
+                                        dot
+                                      />
+                                    </td>
+                                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary">
+                                      {c.startDatum && c.eindDatum ? `${formatDate(c.startDatum)} – ${formatDate(c.eindDatum)}` : "—"}
+                                    </td>
+                                    <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-primary text-right">
+                                      {c.waarde ? new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(c.waarde) : "—"}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     )}
 
