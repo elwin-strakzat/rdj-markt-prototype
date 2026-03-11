@@ -16,6 +16,7 @@ import Relaties from "./pages/Relaties";
 import RelatieDetail from "./pages/RelatieDetail";
 import Contracten from "./pages/Contracten";
 import ContractDetail from "./pages/ContractDetail";
+import Taken from "./pages/Taken";
 import CrmLadingDetail from "./pages/CrmLadingDetail";
 import CrmVaartuigDetail from "./pages/CrmVaartuigDetail";
 import Ladingen from "./pages/Ladingen";
@@ -196,6 +197,10 @@ export const router = createBrowserRouter([
       {
         path: "lading/:id",
         Component: LadingModuleDetail,
+      },
+      {
+        path: "crm/taken",
+        Component: Taken,
       },
       {
         path: "crm/deals",

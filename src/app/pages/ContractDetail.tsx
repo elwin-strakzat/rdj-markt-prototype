@@ -10,6 +10,7 @@ import ContractFormDialog from "../components/ContractFormDialog";
 import { mockRelaties, mockContactPersonen, mockGebruikers, mockMailConversaties } from "../data/mock-relatie-data";
 import { mockContracten, mockLadingSoorten, CONTRACT_SOORT_LABELS, CONTRACT_STATUS_LABELS, CONTRACT_STATUS_VARIANT_MAP } from "../data/mock-contract-data";
 import MailConversaties from "../components/MailConversaties";
+import TakenList from "../components/TakenList";
 import type { Contract } from "../data/api";
 
 function formatDate(dateStr?: string): string {
@@ -290,6 +291,9 @@ export default function ContractDetail() {
                             </Link>
                           </div>
                         )}
+
+                        {/* Taken */}
+                        <TakenList relatieId={contract.relatieId} contractId={contract.id} showRelatie={false} showDeal={false} compact />
 
                         {/* Opmerkingen */}
                         {contract.opmerkingen && (
