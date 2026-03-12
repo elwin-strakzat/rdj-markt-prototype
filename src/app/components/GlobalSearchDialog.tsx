@@ -62,7 +62,7 @@ function buildSearchResults(): SearchResult[] {
       type: "vaartuig",
       title: v.naam,
       subtitle: `${v.type} · ${v.capaciteit}`,
-      path: `/crm/relatie/${v.relatieId}`,
+      path: `/crm/relatie/${v.relatieId}/vaartuig/${v.id}`,
       meta: {
         type: v.type,
         capaciteit: v.capaciteit,
