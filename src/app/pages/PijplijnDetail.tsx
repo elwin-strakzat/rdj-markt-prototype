@@ -52,7 +52,7 @@ const statusTypeMap: Record<string, "default" | "color"> = {
 /* ── Mock data ── */
 const mockNegotiationsLading = [
   { id: '1', company: 'Janson & Janson B.V.', vrachtprijs: '€3,40 per ton', priceDiff: '+10%', tonnage: '2.345 ton', deadline: 'Za 14 Feb, 16:00', deadlineExpired: true, status: 'Goedgekeurd', contact: 'Erick Nieuwkoop', contactDate: 'Ma 9 Feb 07:28' },
-  { id: '2', company: 'De Vahrenburg C.V.', vrachtprijs: '€3,60 per ton', priceDiff: '-8%', tonnage: '3.678 ton', deadline: 'Registreren, 9:60', deadlineExpired: true, status: 'Bod ontvangen', contact: 'Michiel den Hoe', contactDate: 'Di 10 Feb 19:53' },
+  { id: '2', company: 'De Vahrenburg C.V.', vrachtprijs: '€3,60 per ton', priceDiff: '-8%', tonnage: '3.678 ton', deadline: 'Gisteren, 9:00', deadlineExpired: true, status: 'Bod ontvangen', contact: 'Michiel den Hoe', contactDate: 'Di 10 Feb 19:53' },
   { id: '3', company: 'Rederij Alfa', vrachtprijs: '€3,70 per ton', priceDiff: '-8%', tonnage: '2.890 ton', deadline: 'Morgen, 10:00', deadlineExpired: false, status: 'Bod verstuurd', contact: 'Khoa Nguyen', contactDate: 'Zo 8 Feb 21:12' },
   { id: '4', company: 'Rederij Abel', vrachtprijs: '€3,20 per ton', priceDiff: '+6%', tonnage: '4.123 ton', deadline: 'Morgen, 11:00', deadlineExpired: false, status: 'Bod ontvangen', contact: 'Pelger de Jong', contactDate: 'Za 7 Feb 18:39' },
   { id: '5', company: 'Vaart Wel B.V.', vrachtprijs: '€3,90 per ton', priceDiff: '+4%', tonnage: '3.456 ton', deadline: 'Do 19 Feb, 11:16', deadlineExpired: false, status: 'Afgewezen', contact: 'Michiel den Hoe', contactDate: 'Vr 6 Feb 11:47' },

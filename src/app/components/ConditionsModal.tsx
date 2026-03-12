@@ -36,8 +36,8 @@ export default function ConditionsModal({ cargo, onClose, onSave }: ConditionsMo
   const [loadingTimeUnit, setLoadingTimeUnit] = useState("uur");
   const [unloadingTime, setUnloadingTime] = useState("");
   const [unloadingTimeUnit, setUnloadingTimeUnit] = useState("uur");
-  const [loadingCondition, setLoadingCondition] = useState("conform-nederlands-werklijst");
-  const [unloadingCondition, setUnloadingCondition] = useState("conform-nederlands-werklijst");
+  const [loadingCondition, setLoadingCondition] = useState("conform-nederlands-wettelijk");
+  const [unloadingCondition, setUnloadingCondition] = useState("conform-nederlands-wettelijk");
   const [remarks, setRemarks] = useState("");
 
   const handleSubmit = () => {
@@ -161,9 +161,9 @@ export default function ConditionsModal({ cargo, onClose, onSave }: ConditionsMo
                 <p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#344054] text-[14px] whitespace-nowrap">Laadtijd</p>
                 <div className="flex gap-[8px] w-full">
                   <Checkbox
-                    checked={loadingCondition === "conform-nederlands-werklijst"}
-                    onChange={(checked) => setLoadingCondition(checked ? "conform-nederlands-werklijst" : "")}
-                    label="Conform Nederlands Werklijst"
+                    checked={loadingCondition === "conform-nederlands-wettelijk"}
+                    onChange={(checked) => setLoadingCondition(checked ? "conform-nederlands-wettelijk" : "")}
+                    label="Conform Nederlands Wettelijk"
                   />
                 </div>
                 <div className="flex gap-[8px] w-full">
@@ -189,9 +189,9 @@ export default function ConditionsModal({ cargo, onClose, onSave }: ConditionsMo
                 <p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#344054] text-[14px] whitespace-nowrap">Lostijd</p>
                 <div className="flex items-center gap-[8px]">
                   <Checkbox
-                    checked={unloadingCondition === "conform-nederlands-werklijst"}
-                    onChange={(checked) => setUnloadingCondition(checked ? "conform-nederlands-werklijst" : "")}
-                    label="Conform Nederlands Werklijst"
+                    checked={unloadingCondition === "conform-nederlands-wettelijk"}
+                    onChange={(checked) => setUnloadingCondition(checked ? "conform-nederlands-wettelijk" : "")}
+                    label="Conform Nederlands Wettelijk"
                   />
                 </div>
                 <div className="flex gap-[8px] w-full">
