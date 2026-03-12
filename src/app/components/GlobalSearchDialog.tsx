@@ -53,7 +53,7 @@ function buildSearchResults(): SearchResult[] {
         tonnage: l.tonnage,
         laadhaven: l.laadhaven,
         loshaven: l.loshaven,
-        laaddatum: l.laaddatum,
+        laaddatum: l.laaddatum || "",
         status: STATUS_LABELS[l.status] || l.status,
         relatie: relatie?.naam || "",
       },
@@ -188,7 +188,7 @@ export default function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchD
         (r) =>
           r.title.toLowerCase().includes(q) ||
           r.subtitle.toLowerCase().includes(q) ||
-          Object.values(r.meta || {}).some((v) => v.toLowerCase().includes(q))
+          Object.values(r.meta || {}).some((v) => typeof v === "string" && v.toLowerCase().includes(q))
       );
     }
 
