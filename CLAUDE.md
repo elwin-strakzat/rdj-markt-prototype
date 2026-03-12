@@ -1,0 +1,1 @@
+Use token based styling that has already been setup. Use components that have already been made and that seem to fit the bill. If a component does not exist, say this and ask how to set it up before creating a new one.

@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router";
+import { Search } from "lucide-react";
 import svgPaths from "../../imports/svg-5lxjaeghl9";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
 import svgPathsMenu from "../../imports/svg-80ushx2b4a";
 import { mockTaken } from "../data/mock-taken-data";
+import GlobalSearchDialog from "./GlobalSearchDialog";
 
 export default function Sidebar() {
+  const [showSearch, setShowSearch] = useState(false);
   const [showMarktMenu, setShowMarktMenu] = useState(false);
   const [showCrmMenu, setShowCrmMenu] = useState(false);
   const [menuTop, setMenuTop] = useState(0);
@@ -226,9 +229,17 @@ export default function Sidebar() {
             <div className="relative shrink-0 w-full" data-name="Navigation">
               <div className="flex flex-col items-center size-full">
                 <div className="content-stretch flex flex-col gap-[16px] items-center px-[16px] relative w-full">
+                  {/* Zoeken */}
+                  <div onClick={() => setShowSearch(true)} className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group cursor-pointer" data-name="Item">
+                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] group-hover:bg-rdj-bg-secondary-hover" data-name="_Nav item button">
+                      <Search className="shrink-0 size-[24px]" stroke="#667085" strokeWidth={2} />
+                    </div>
+                    <p className="font-sans font-normal leading-[18px] relative shrink-0 text-[#344054] text-[12px] whitespace-nowrap">Zoeken</p>
+                  </div>
+
                   {/* Lading */}
-                  <Link to="/lading" className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
-                    <div className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] ${isLadingPage ? 'bg-[#e3effb]' : ''}`} data-name="_Nav item button">
+                  <Link to="/lading" className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group" data-name="Item">
+                    <div className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] ${isLadingPage ? 'bg-[#e3effb]' : 'group-hover:bg-rdj-bg-secondary-hover'}`} data-name="_Nav item button">
                       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="container">
                         <div className="absolute inset-[8.93%_12.5%]" data-name="Icon">
                           <div className="absolute inset-[-5.07%_-5.56%]">
@@ -243,8 +254,8 @@ export default function Sidebar() {
                   </Link>
                   
                   {/* Vloot */}
-                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
-                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px]" data-name="_Nav item button">
+                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group cursor-pointer" data-name="Item">
+                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] group-hover:bg-rdj-bg-secondary-hover" data-name="_Nav item button">
                       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="anchor">
                         <div className="absolute inset-[8.33%]" data-name="Icon">
                           <div className="absolute inset-[-5%]">
@@ -259,8 +270,8 @@ export default function Sidebar() {
                   </div>
                   
                   {/* Planning */}
-                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 w-full" data-name="Item">
-                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0" data-name="_Nav item button">
+                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 w-full group cursor-pointer" data-name="Item">
+                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 group-hover:bg-rdj-bg-secondary-hover" data-name="_Nav item button">
                       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="clipboard">
                         <div className="absolute inset-[8.33%_16.67%]" data-name="Icon">
                           <div className="absolute inset-[-5%_-6.25%]">
@@ -275,9 +286,9 @@ export default function Sidebar() {
                   </div>
                   
                   {/* Markt (Active) */}
-                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
+                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group" data-name="Item">
                     <div
-                      className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] cursor-pointer ${isMarktPage ? 'bg-[#e3effb]' : ''}`}
+                      className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] cursor-pointer ${isMarktPage ? 'bg-[#e3effb]' : 'group-hover:bg-rdj-bg-secondary-hover'}`}
                       data-name="_Nav item button"
                       ref={marktButtonRef}
                       onMouseEnter={handleMarktMouseEnter}
@@ -297,8 +308,8 @@ export default function Sidebar() {
                   </div>
                   
                   {/* Backoffice */}
-                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
-                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px]" data-name="_Nav item button">
+                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group cursor-pointer" data-name="Item">
+                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] group-hover:bg-rdj-bg-secondary-hover" data-name="_Nav item button">
                       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="box">
                         <div className="absolute inset-[12.5%_8.33%]" data-name="Icon">
                           <div className="absolute inset-[-5.56%_-5%]">
@@ -313,9 +324,9 @@ export default function Sidebar() {
                   </div>
                   
                   {/* CRM */}
-                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Item">
+                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group" data-name="Item">
                     <div
-                      className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] cursor-pointer ${isCrmPage ? 'bg-[#e3effb]' : ''}`}
+                      className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] cursor-pointer ${isCrmPage ? 'bg-[#e3effb]' : 'group-hover:bg-rdj-bg-secondary-hover'}`}
                       data-name="_Nav item button"
                       ref={crmButtonRef}
                       onMouseEnter={handleCrmMouseEnter}
@@ -522,6 +533,8 @@ export default function Sidebar() {
           <div aria-hidden="true" className="absolute border border-rdj-border-secondary border-solid inset-0 pointer-events-none rounded-[6px] shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]" />
         </div>
       )}
+
+      <GlobalSearchDialog open={showSearch} onOpenChange={setShowSearch} />
     </div>
   );
 }
