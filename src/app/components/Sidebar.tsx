@@ -35,6 +35,9 @@ export default function Sidebar() {
   // Check if current page is a Lading page
   const isLadingPage = location.pathname === '/lading' || location.pathname.startsWith('/lading/');
 
+  // Check if current page is a Vloot page
+  const isVlootPage = location.pathname === '/vloot' || location.pathname.startsWith('/vloot/');
+
   // Check if current page is a CRM page
   const isCrmPage = location.pathname.startsWith('/crm/');
 
@@ -254,20 +257,20 @@ export default function Sidebar() {
                   </Link>
                   
                   {/* Vloot */}
-                  <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group cursor-pointer" data-name="Item">
-                    <div className="content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] group-hover:bg-rdj-bg-secondary-hover" data-name="_Nav item button">
+                  <Link to="/vloot" className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 group" data-name="Item">
+                    <div className={`content-stretch flex items-center justify-center overflow-clip p-[8px] relative rounded-[4px] shrink-0 size-[40px] ${isVlootPage ? 'bg-[#e3effb]' : 'group-hover:bg-rdj-bg-secondary-hover'}`} data-name="_Nav item button">
                       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="anchor">
                         <div className="absolute inset-[8.33%]" data-name="Icon">
                           <div className="absolute inset-[-5%]">
                             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22 22">
-                              <path d={svgPaths.p22d4a480} id="Icon" stroke="var(--stroke-0, #667085)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                              <path d={svgPaths.p22d4a480} id="Icon" stroke={isVlootPage ? "#1567A4" : "#667085"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                             </svg>
                           </div>
                         </div>
                       </div>
                     </div>
                     <p className="font-sans font-normal leading-[18px] relative shrink-0 text-[#344054] text-[12px] whitespace-nowrap">Vloot</p>
-                  </div>
+                  </Link>
                   
                   {/* Planning */}
                   <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 w-full group cursor-pointer" data-name="Item">

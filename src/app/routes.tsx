@@ -21,6 +21,8 @@ import CrmLadingDetail from "./pages/CrmLadingDetail";
 import CrmVaartuigDetail from "./pages/CrmVaartuigDetail";
 import Ladingen from "./pages/Ladingen";
 import LadingModuleDetail from "./pages/LadingModuleDetail";
+import Vloot from "./pages/Vloot";
+import VlootVaartuigDetail from "./pages/VlootVaartuigDetail";
 
 function RootLayout() {
   return <Outlet />;
@@ -189,6 +191,14 @@ export const router = createBrowserRouter([
       {
         path: "crm/relatie/:id",
         Component: RelatieDetail,
+      },
+      {
+        path: "vloot",
+        Component: Vloot,
+      },
+      {
+        path: "vloot/:id",
+        Component: VlootVaartuigDetail,
       },
       {
         path: "lading",
