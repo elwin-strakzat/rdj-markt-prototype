@@ -5,9 +5,10 @@ import { Dialog, DialogOverlay, DialogPortal } from "./ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import Button from "./Button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "./ui/dropdown-menu";
-import { mockRelaties, mockRelatieLadingen, mockRelatieVaartuigen } from "../data/mock-relatie-data";
+import { mockRelaties, mockRelatieLadingen, mockRelatieVaartuigen, mockContactPersonen } from "../data/mock-relatie-data";
 import type { RelatieLading, RelatieVaartuig } from "../data/mock-relatie-data";
 import type { Relatie } from "../data/api";
+import GespreksverslagQuickDialog from "./GespreksverslagQuickDialog";
 import { mockVlootData } from "../data/mock-vloot-data";
 import type { VlootVaartuig } from "../data/mock-vloot-data";
 
@@ -165,6 +166,7 @@ export default function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchD
   const [activeFilters, setActiveFilters] = useState<Set<SearchResultType>>(new Set());
   const [recentSearches, setRecentSearches] = useState<SearchResult[]>([]);
   const [focusedActionIndex, setFocusedActionIndex] = useState(0);
+  const [gespreksverslagRelatie, setGespreksverslagRelatie] = useState<{ id: string; naam: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -244,10 +246,17 @@ export default function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchD
     const list: { id: string; icon: typeof ExternalLink; action: () => void }[] = [];
     list.push({ id: "open", icon: ExternalLink, action: () => handleSelect(selectedResult) });
     if (selectedResult.type === "relatie") {
-      list.push({ id: "phone", icon: Phone, action: () => {} });
+      list.push({
+        id: "phone",
+        icon: Phone,
+        action: () => {
+          onOpenChange(false);
+          setGespreksverslagRelatie({ id: selectedResult.id, naam: selectedResult.title });
+        },
+      });
     }
     return list;
-  }, [selectedResult, handleSelect]);
+  }, [selectedResult, handleSelect, onOpenChange]);
 
   // Reset focused action when selected result changes
   useEffect(() => {
@@ -320,6 +329,7 @@ export default function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchD
   }, [open, onOpenChange]);
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
         <DialogOverlay className="bg-black/40" />
@@ -605,5 +615,16 @@ export default function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchD
         </DialogPrimitive.Content>
       </DialogPortal>
     </Dialog>
+
+    {gespreksverslagRelatie && (
+      <GespreksverslagQuickDialog
+        relatieId={gespreksverslagRelatie.id}
+        relatieNaam={gespreksverslagRelatie.naam}
+        contactPersonen={mockContactPersonen.filter((cp) => cp.relatieId === gespreksverslagRelatie.id)}
+        onSave={() => setGespreksverslagRelatie(null)}
+        onClose={() => setGespreksverslagRelatie(null)}
+      />
+    )}
+    </>
   );
 }
