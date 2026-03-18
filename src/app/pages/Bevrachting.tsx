@@ -117,7 +117,7 @@ export default function Bevrachting() {
   };
 
   const tableColumns: Column[] = [
-    { key: 'subpartij', header: 'Subpartij', type: 'leading-text', subtextKey: 'subpartijEx', badgeKey: 'leadingBadge' },
+    { key: 'subpartij', header: 'Subpartij', type: 'leading-text', subtextKey: 'subpartijEx', badgeKey: 'leadingBadge', iconKey: 'exTypeIcon' },
     { key: 'statusLabel', header: 'Status', type: 'status', width: 'w-[140px]', variantKey: 'statusVariant' },
     { key: 'ladingType', header: 'Lading', type: 'text', width: 'w-[160px]', subtextKey: 'ladingSG' },
     { key: 'tonnage', header: 'Tonnage', type: 'text', width: 'w-[120px]', align: 'right' },
@@ -173,6 +173,7 @@ export default function Bevrachting() {
       id: c.id,
       subpartij: c.title,
       subpartijEx: c.code,
+      exTypeIcon: c.exType,
       statusLabel: statusLabelMap[c.status],
       statusVariant: statusVariantMap[c.status],
       ladingType,

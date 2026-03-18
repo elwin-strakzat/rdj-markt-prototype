@@ -6,6 +6,7 @@ export const exen: Ex[] = [
   { id: "ex-003", naam: "A2B Future", type: "zeeboot" },
   { id: "ex-004", naam: "Merganser", type: "zeeboot" },
   { id: "ex-005", naam: "Morgenster", type: "opslag" },
+  { id: "ex-006", naam: "Opslagloods Europoort", type: "opslag" },
 ];
 
 export const partijen: Partij[] = [
@@ -45,6 +46,24 @@ export const partijen: Partij[] = [
     laadhavenId: "hav-009",
     subpartijIds: ["sub-004"],
   },
+  {
+    id: "par-005",
+    naam: "Kolen Morgenster",
+    ladingSoortId: "ls-002",
+    subsoortId: "lss-003",
+    exId: "ex-005",
+    laadhavenId: "hav-003",
+    subpartijIds: ["sub-005"],
+  },
+  {
+    id: "par-006",
+    naam: "Mais Europoort",
+    ladingSoortId: "ls-001",
+    subsoortId: "lss-002",
+    exId: "ex-006",
+    laadhavenId: "hav-009",
+    subpartijIds: ["sub-006"],
+  },
 ];
 
 export const subpartijen: Subpartij[] = [
@@ -82,6 +101,24 @@ export const subpartijen: Subpartij[] = [
     bijzonderheidIds: ["bh-001", "bh-002", "bh-003"],
     loshavenId: "hav-010",
     laaddatum: "2026-03-16",
+    losdatum: "2026-03-22",
+  },
+  {
+    id: "sub-005",
+    naam: "Kolen Morgenster–Duisburg #1",
+    partijId: "par-005",
+    bijzonderheidIds: ["bh-003"],
+    loshavenId: "hav-005",
+    laaddatum: "2026-03-20",
+    losdatum: "2026-03-23",
+  },
+  {
+    id: "sub-006",
+    naam: "Mais Europoort–Mannheim #1",
+    partijId: "par-006",
+    bijzonderheidIds: ["bh-001"],
+    loshavenId: "hav-006",
+    laaddatum: "2026-03-19",
     losdatum: "2026-03-22",
   },
 ];

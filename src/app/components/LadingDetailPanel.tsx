@@ -12,6 +12,7 @@ import NegotiationDialog from "./NegotiationDialog";
 import { DetailsSidebarSection } from "./DetailsSidebar";
 import DetailRow from "./DetailRow";
 import { useBevrachtingLadingSummary, useLadingEigenDetail, useLadingMarktDetail } from "../data/useDetailData";
+import { updateLadingMarktPriority } from "../data/useMarktData";
 import { mockMatches, mockNegotiations } from "../data/mock-data";
 import svgPaths from "../../imports/svg-62fj7rjvas";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
@@ -265,11 +266,18 @@ function LadingEigenSidebarContent({ id }: { id: string }) {
   const eigenResult = useLadingEigenDetail(id);
   const marktResult = useLadingMarktDetail(id);
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [localPriority, setLocalPriority] = useState<number | null>(null);
 
   const loading = eigenResult.loading || marktResult.loading;
   const data = eigenResult.data;
   const marktData = marktResult.data;
   const isMarkt = !data && !!marktData;
+  const priority = localPriority ?? marktData?.prioriteit ?? 0;
+
+  const handleRate = (value: number) => {
+    setLocalPriority(value);
+    updateLadingMarktPriority(id, value).catch(console.error);
+  };
 
   if (loading) {
     return (
@@ -340,6 +348,7 @@ function LadingEigenSidebarContent({ id }: { id: string }) {
       {activeTab === "details" && isMarkt && marktData && (
         <>
           <DetailsSidebarSection>
+            <DetailRow label="Prioriteit" type="rating" rating={priority} onRate={handleRate} />
             <DetailRow label="Tonnage" value={marktData.tonnage} editable />
             <DetailRow label="Lading" value={marktData.lading} editable />
             <DetailRow label="Subsoort" value={marktData.subsoort} editable />

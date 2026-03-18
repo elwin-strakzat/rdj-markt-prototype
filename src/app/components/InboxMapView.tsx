@@ -635,12 +635,10 @@ function ZoomControls() {
 }
 
 interface InboxMapViewProps {
-  onArchive: (ids: string[]) => void;
-  onMoveToPipeline: (ids: string[]) => void;
   mode: 'laden' | 'lossen';
 }
 
-export default function InboxMapView({ onArchive, onMoveToPipeline, mode }: InboxMapViewProps) {
+export default function InboxMapView({ mode }: InboxMapViewProps) {
   const navigate = useNavigate();
   const { openDetail } = useDetailPanel();
   const [selectedCluster, setSelectedCluster] = useState<{ lat: number; lng: number; items: MapCargoItem[] } | null>(null);
@@ -789,30 +787,6 @@ export default function InboxMapView({ onArchive, onMoveToPipeline, mode }: Inbo
                         </button>
                       ))}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-[4px]">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onArchive([item.id]);
-                      }}
-                      className="p-[4px] rounded-[4px] hover:bg-[#fee4e2] transition-colors"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M12 4L4 12M4 4L12 12" stroke="#667085" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMoveToPipeline([item.id]);
-                      }}
-                      className="p-[4px] rounded-[4px] bg-[#1567a4] hover:bg-[#145990] transition-colors"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M3.333 8L6.666 11.333L12.666 5.333" stroke="white" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
                   </div>
                 </div>
               </div>
