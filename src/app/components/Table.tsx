@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { useState } from "react";
+import { Ship, Warehouse } from "lucide-react";
 import Checkbox from "./Checkbox";
 import FeaturedIcon from "./FeaturedIcon";
 import Badge, { type BadgeVariant } from "./Badge";
@@ -64,6 +65,8 @@ export interface LeadingTextColumn extends BaseColumn {
   badgeKey?: string;
   /** Row key for the badge variant (BadgeVariant). Defaults to "grey" */
   badgeVariantKey?: string;
+  /** Row key for an icon type indicator ("vaartuig" | "warehouse") */
+  iconKey?: string;
   /** Label for the hover action button (default: "Openen") */
   actionLabel?: string;
 }
@@ -211,6 +214,7 @@ function CellLeadingText({
   const actionLabel = col.actionLabel ?? "Openen";
 
   const badgeLabel = col.badgeKey ? row[col.badgeKey] : undefined;
+  const iconType = col.iconKey ? row[col.iconKey] : undefined;
 
   return (
     <div className="flex items-center gap-[8px] min-w-0">
@@ -221,6 +225,15 @@ function CellLeadingText({
             <svg className="block size-[8px]" fill="none" viewBox="0 0 8 8">
               <circle cx="4" cy="4" fill="#258DD2" r="4" />
             </svg>
+          )}
+        </div>
+      )}
+      {iconType && (
+        <div className="shrink-0 flex items-center justify-center">
+          {iconType === "Warehouse" ? (
+            <Warehouse className="size-[16px] text-rdj-text-tertiary" />
+          ) : (
+            <Ship className="size-[16px] text-rdj-text-tertiary" />
           )}
         </div>
       )}

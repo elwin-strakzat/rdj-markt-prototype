@@ -557,7 +557,7 @@ export function usePijplijnLadingSummary(id: string | undefined, typeHint?: "eig
               const soortLabel = subsoort ? `${soort?.naam || ""} (${subsoort.naam})` : soort?.naam || "";
               resolved = {
                 type: "eigen",
-                title: ex ? `m/v ${ex.naam} - ${relatie?.naam || ""}` : `${subpartij?.naam || ""} - ${relatie?.naam || ""}`,
+                title: ex ? `${ex.type === "Warehouse" ? ex.naam : `m/v ${ex.naam}`} - ${relatie?.naam || ""}` : `${subpartij?.naam || ""} - ${relatie?.naam || ""}`,
                 subtitle: `${formatTonnage(item.tonnage)} ton ${soortLabel}`,
                 status: "Is in de markt",
                 statusColor: "#17B26A",
@@ -820,6 +820,7 @@ export function useInboxVaartuigSummary(id: string | undefined) {
  */
 export interface BevrachtingLadingSummary {
   title: string;
+  exType?: string;
   subtitle: string;
   status: string;
   statusVariant: "success" | "warning" | "brand" | "grey";
@@ -856,11 +857,12 @@ export function useBevrachtingLadingSummary(id: string | undefined) {
           const loshaven = subpartij ? maps.havens.get(subpartij.loshavenId) : null;
 
           const soortLabel = subsoort ? `${soort?.naam || ""} (${subsoort.naam})` : soort?.naam || "";
-          const title = ex ? `m/v ${ex.naam}` : subpartij?.naam || id || "—";
+          const title = ex ? (ex.type === "Warehouse" ? ex.naam : `m/v ${ex.naam}`) : subpartij?.naam || id || "—";
           const status = (item as any).status || "intake";
 
           resolved = {
             title,
+            exType: ex?.type,
             subtitle: `${formatTonnage(item.tonnage)} ton ${soortLabel} vanuit ${laadhaven?.naam || "—"} (${subpartij?.laaddatum ? formatDate(subpartij.laaddatum) : "Af te stemmen"}) naar ${loshaven?.naam || "—"} (${subpartij?.losdatum ? formatDate(subpartij.losdatum) : "Af te stemmen"})`,
             status: status === "pijplijn" ? "Pijplijn" : status === "inbox" ? "Inbox" : status === "markt" ? "In de markt" : status === "werklijst" ? "Werklijst" : status === "intake" ? "Intake" : "Gesloten",
             statusVariant: status === "pijplijn" ? "brand" : status === "inbox" ? "grey" : status === "markt" ? "success" : status === "werklijst" ? "warning" : status === "intake" ? "brand" : "grey",

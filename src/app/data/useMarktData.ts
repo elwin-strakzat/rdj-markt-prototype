@@ -284,6 +284,7 @@ export function useInboxVaartuigen() {
 export interface BevrachtingCargo {
   id: string;
   title: string;
+  exType?: string;
   code: string;
   company?: string;
   status: "intake" | "werklijst" | "markt" | "gesloten";
@@ -354,7 +355,8 @@ export function useBevrachtingData() {
 
         return {
           id: item.id,
-          title: ex ? `m/v ${ex.naam}` : subpartij?.naam || item.id,
+          title: ex ? (ex.type === "Warehouse" ? ex.naam : `m/v ${ex.naam}`) : subpartij?.naam || item.id,
+          exType: ex?.type,
           code: subpartij?.naam || "",
           company: relatie?.naam,
           status,

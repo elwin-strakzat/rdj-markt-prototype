@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router";
-import { Send, MailOpen, Check, X } from "lucide-react";
+import { Send, MailOpen, Check, X, Ship, Warehouse } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import type { PageTab } from "../components/PageHeader";
@@ -220,6 +220,13 @@ export default function LadingDetail() {
                 <div className="content-stretch flex flex-col gap-[0px] items-start max-w-[1116px] pt-[24px] relative shrink-0 w-full">
                   <PageHeader
                     title={summaryLoading ? "Laden..." : (summary?.title || "—")}
+                    titleIcon={summary?.exType ? (
+                      summary.exType === "Warehouse" ? (
+                        <Warehouse className="size-[24px] text-rdj-text-tertiary" />
+                      ) : (
+                        <Ship className="size-[24px] text-rdj-text-tertiary" />
+                      )
+                    ) : undefined}
                     titleBadge={titleBadge}
                     subtitle={subtitle}
                     actions={actions}

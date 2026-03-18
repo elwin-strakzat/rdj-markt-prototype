@@ -13,6 +13,8 @@ export interface PageTab {
 interface PageHeaderProps {
   /** Page title */
   title: string;
+  /** Optional icon shown before the title */
+  titleIcon?: ReactNode;
   /** Optional compact badge shown inline next to the title */
   titleBadge?: ReactNode;
   /** Optional subtitle shown below the title */
@@ -33,6 +35,7 @@ interface PageHeaderProps {
 
 export default function PageHeader({
   title,
+  titleIcon,
   titleBadge,
   subtitle,
   titleMeta,
@@ -53,6 +56,7 @@ export default function PageHeader({
             <div className="content-center flex flex-wrap gap-[20px_16px] items-center relative shrink-0 w-full">
               <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] items-start min-h-px min-w-[320px] relative">
                 <div className="flex items-center gap-[12px] w-full">
+                  {titleIcon}
                   <p className="font-sans font-bold leading-[38px] shrink-0 text-rdj-text-primary text-[30px]">
                     {title}
                   </p>

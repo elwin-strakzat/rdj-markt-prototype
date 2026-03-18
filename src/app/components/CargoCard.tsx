@@ -1,4 +1,5 @@
 import { useDrag } from "react-dnd";
+import { Ship, Warehouse } from "lucide-react";
 import { useDetailPanel } from "./DetailPanelContext";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
 import { Cargo } from "../data/mock-data";
@@ -27,9 +28,18 @@ export default function CargoCard({ cargo }: CargoCardProps) {
         {/* Header: Title + Avatar */}
         <div className="flex items-start justify-between gap-[8px] mb-[12px]">
           <div className="flex-1 min-w-0">
-            <p className="font-sans font-bold leading-[20px] text-rdj-text-primary text-[14px]">
-              {cargo.title}
-            </p>
+            <div className="flex items-center gap-[4px]">
+              {cargo.exType && (
+                cargo.exType === "Warehouse" ? (
+                  <Warehouse className="shrink-0 size-[14px] text-rdj-text-tertiary" />
+                ) : (
+                  <Ship className="shrink-0 size-[14px] text-rdj-text-tertiary" />
+                )
+              )}
+              <p className="font-sans font-bold leading-[20px] text-rdj-text-primary text-[14px]">
+                {cargo.title}
+              </p>
+            </div>
             <p className="font-sans font-normal leading-[18px] text-rdj-text-secondary text-[12px] mt-[2px]">
               {cargo.company && <>{cargo.company} · </>}{cargo.code}
             </p>
