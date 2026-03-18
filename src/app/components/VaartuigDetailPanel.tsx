@@ -185,16 +185,16 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
         onClose={onClose}
         sidebar={sidebarContent}
       >
-        <div className="flex flex-col px-[24px] py-[16px]">
+        <div className="flex flex-col py-[16px]">
           {/* Status badge */}
           {titleBadge && (
-            <div className="mb-[16px]">
+            <div className="mb-[16px] px-[24px]">
               {titleBadge}
             </div>
           )}
 
           {/* Tabs */}
-          <div className="flex gap-[4px] border-b border-rdj-border-secondary mb-[16px]">
+          <div className="flex gap-[4px] border-b border-rdj-border-secondary mb-[16px] px-[24px]">
             {tabs.map((tab) => (
               <button
                 key={tab.path}
@@ -263,7 +263,7 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
           )}
 
           {activeTab === 'activiteit' && (
-            <div className="w-full">
+            <div className="w-full px-[24px]">
               <ActivityFeed />
             </div>
           )}

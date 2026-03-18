@@ -183,3 +183,12 @@ body {
   --rdj-border-primary: #344054;
   --rdj-border-secondary: #1d2939;
 }
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
