@@ -2,6 +2,7 @@ import svgPaths from "../../imports/svg-gjl6m1r792";
 import FloatingActionBar from "../components/FloatingActionBar";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { useDetailPanel } from "../components/DetailPanelContext";
 import { toast, Toaster } from "sonner";
 import Sidebar from "../components/Sidebar";
 import VesselMapView from "../components/VesselMapView";
@@ -201,6 +202,7 @@ const mockVesselData: VesselItem[] = [
 
 export default function InboxVessels() {
   const navigate = useNavigate();
+  const { openDetail, activeDetail } = useDetailPanel();
   const { data: apiVessels, loading, error, refetch } = useInboxVaartuigen();
   const [localItems, setLocalItems] = useState<VesselItem[] | null>(null);
   const vesselItems: VesselItem[] = localItems ?? apiVessels.map(a => ({
@@ -421,7 +423,8 @@ export default function InboxVessels() {
             <Table
               columns={columns}
               data={tableData}
-              onRowClick={(row) => navigate(`/markt/inbox/vaartuig/${row.id}`)}
+              onRowClick={(row) => openDetail('vaartuig', row.id)}
+              activeRowId={activeDetail?.type === 'vaartuig' ? activeDetail.id : null}
               selectable
               selectedIds={selectedItems}
               onSelectAll={handleSelectAll}

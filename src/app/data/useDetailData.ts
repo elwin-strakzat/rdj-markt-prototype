@@ -841,31 +841,53 @@ export function useBevrachtingLadingSummary(id: string | undefined) {
       setLoading(true);
       setError(null);
       try {
-        const [item, maps] = await Promise.all([
-          api.get<LadingEigen & { status?: string }>("lading_eigen", id),
-          getLookups(),
-        ]);
+        const maps = await getLookups();
+        let resolved: BevrachtingLadingSummary;
 
-        const partij = maps.partijen.get(item.partijId);
-        const subpartij = maps.subpartijen.get(item.subpartijId);
-        const ex = partij?.exId ? maps.exen.get(partij.exId) : null;
-        const soort = partij ? maps.ladingSoorten.get(partij.ladingSoortId) : null;
-        const subsoort = partij ? maps.ladingSubsoorten.get(partij.subsoortId) : null;
-        const laadhaven = partij ? maps.havens.get(partij.laadhavenId) : null;
-        const loshaven = subpartij ? maps.havens.get(subpartij.loshavenId) : null;
+        // Try lading_eigen first, then fall back to lading_markt
+        try {
+          const item = await api.get<LadingEigen & { status?: string }>("lading_eigen", id);
 
-        const soortLabel = subsoort ? `${soort?.naam || ""} (${subsoort.naam})` : soort?.naam || "";
-        const title = ex ? (ex.type === "Warehouse" ? ex.naam : `m/v ${ex.naam}`) : subpartij?.naam || id || "—";
-        const status = (item as any).status || "intake";
+          const partij = maps.partijen.get(item.partijId);
+          const subpartij = maps.subpartijen.get(item.subpartijId);
+          const ex = partij?.exId ? maps.exen.get(partij.exId) : null;
+          const soort = partij ? maps.ladingSoorten.get(partij.ladingSoortId) : null;
+          const subsoort = partij ? maps.ladingSubsoorten.get(partij.subsoortId) : null;
+          const laadhaven = partij ? maps.havens.get(partij.laadhavenId) : null;
+          const loshaven = subpartij ? maps.havens.get(subpartij.loshavenId) : null;
 
-        const resolved: BevrachtingLadingSummary = {
-          title,
-          exType: ex?.type,
-          subtitle: `${formatTonnage(item.tonnage)} ton ${soortLabel} vanuit ${laadhaven?.naam || "—"} (${subpartij?.laaddatum ? formatDate(subpartij.laaddatum) : "Af te stemmen"}) naar ${loshaven?.naam || "—"} (${subpartij?.losdatum ? formatDate(subpartij.losdatum) : "Af te stemmen"})`,
-          status: status === "pijplijn" ? "Pijplijn" : status === "inbox" ? "Inbox" : status === "markt" ? "In de markt" : status === "werklijst" ? "Werklijst" : status === "intake" ? "Intake" : "Gesloten",
-          statusVariant: status === "pijplijn" ? "brand" : status === "inbox" ? "grey" : status === "markt" ? "success" : status === "werklijst" ? "warning" : status === "intake" ? "brand" : "grey",
-          breadcrumbLabel: title.substring(0, 20),
-        };
+          const soortLabel = subsoort ? `${soort?.naam || ""} (${subsoort.naam})` : soort?.naam || "";
+          const title = ex ? (ex.type === "Warehouse" ? ex.naam : `m/v ${ex.naam}`) : subpartij?.naam || id || "—";
+          const status = (item as any).status || "intake";
+
+          resolved = {
+            title,
+            exType: ex?.type,
+            subtitle: `${formatTonnage(item.tonnage)} ton ${soortLabel} vanuit ${laadhaven?.naam || "—"} (${subpartij?.laaddatum ? formatDate(subpartij.laaddatum) : "Af te stemmen"}) naar ${loshaven?.naam || "—"} (${subpartij?.losdatum ? formatDate(subpartij.losdatum) : "Af te stemmen"})`,
+            status: status === "pijplijn" ? "Pijplijn" : status === "inbox" ? "Inbox" : status === "markt" ? "In de markt" : status === "werklijst" ? "Werklijst" : status === "intake" ? "Intake" : "Gesloten",
+            statusVariant: status === "pijplijn" ? "brand" : status === "inbox" ? "grey" : status === "markt" ? "success" : status === "werklijst" ? "warning" : status === "intake" ? "brand" : "grey",
+            breadcrumbLabel: title.substring(0, 20),
+          };
+        } catch {
+          const item = await api.get<LadingMarkt & { status?: string; laaddatum?: string; losdatum?: string }>("lading_markt", id);
+
+          const soort = maps.ladingSoorten.get(item.ladingSoortId);
+          const subsoort = maps.ladingSubsoorten.get(item.subsoortId);
+          const laadhaven = maps.havens.get(item.laadhavenId);
+          const loshaven = maps.havens.get(item.loshavenId);
+
+          const soortLabel = subsoort ? `${soort?.naam || ""} (${subsoort.naam})` : soort?.naam || "";
+          const title = `${formatTonnage(item.tonnage)} ton ${soortLabel}` || id || "—";
+          const status = (item as any).status || "inbox";
+
+          resolved = {
+            title,
+            subtitle: `vanuit ${laadhaven?.naam || "—"} (${item.laaddatum ? formatDate(item.laaddatum) : "Af te stemmen"}) naar ${loshaven?.naam || "—"} (${item.losdatum ? formatDate(item.losdatum) : "Af te stemmen"})`,
+            status: status === "pijplijn" ? "Pijplijn" : status === "inbox" ? "Inbox" : status === "markt" ? "In de markt" : status === "werklijst" ? "Werklijst" : status === "intake" ? "Intake" : "Gesloten",
+            statusVariant: status === "pijplijn" ? "brand" : status === "inbox" ? "grey" : status === "markt" ? "success" : status === "werklijst" ? "warning" : status === "intake" ? "brand" : "grey",
+            breadcrumbLabel: title.substring(0, 20),
+          };
+        }
 
         if (mountedRef.current) setData(resolved);
       } catch (err: any) {

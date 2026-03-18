@@ -1,46 +1,8 @@
 /**
- * Frontend API client for Rederij de Jong market module.
- * Provides typed CRUD operations for all entities against the KV-backed server.
+ * Local in-memory data store for Rederij de Jong market module.
+ * Provides typed CRUD operations backed by static dummy data.
+ * No external API calls — everything is instant.
  */
-
-import { projectId, publicAnonKey } from "../../../utils/supabase/info";
-
-const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-53a0cbca`;
-
-const headers = {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${publicAnonKey}`,
-};
-
-// ── Generic response type ──
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-async function request<T>(
-  method: string,
-  path: string,
-  body?: any
-): Promise<T> {
-  const url = `${BASE_URL}${path}`;
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  const json: ApiResponse<T> = await res.json();
-
-  if (!json.success) {
-    console.error(`API error [${method} ${path}]:`, json.error);
-    throw new Error(json.error || "Unknown API error");
-  }
-
-  return json.data as T;
-}
 
 // ── Entity types ──
 
@@ -290,92 +252,131 @@ export interface Contract {
   status: ContractStatus;
   verlorenReden?: string;
   waarde?: number;
-  // Ladingsoort (type lading)
   ladingSoortId?: string;
-  // Spot
   laadhavenNaam?: string;
   loshavenNaam?: string;
   tonnage?: number;
   vrachtprijs?: number;
   laaddatum?: string;
   losdatum?: string;
-  // Contract
   startDatum?: string;
   eindDatum?: string;
   routes?: ContractRoute[];
-  // Meta
   aanmaakDatum: string;
   laatsteUpdate: string;
   opmerkingen?: string;
 }
 
-// ── CRUD operations ──
+// ── Import entity data ──
+
+import { mockRelaties, mockContactPersonen, mockGebruikers } from "./mock-relatie-data";
+import { mockLadingSoorten, mockLadingSubsoorten, mockBijzonderheden } from "./mock-contract-data";
+import { havens } from "./entities/havens";
+import { bronnen } from "./entities/bronnen";
+import { partijen, subpartijen, exen } from "./entities/partijen";
+import { ladingenMarkt } from "./entities/ladingen-markt";
+import { ladingenEigen } from "./entities/ladingen-eigen";
+import { vaartuigenMarkt } from "./entities/vaartuigen-markt";
+import { vaartuigenEigen } from "./entities/vaartuigen-eigen";
+import { onderhandelingen, boden } from "./entities/onderhandelingen";
+
+// ── In-memory store ──
+
+const store: Record<EntityType, any[]> = {
+  relatie: [...mockRelaties],
+  contact_persoon: [...mockContactPersonen],
+  gebruiker: [...mockGebruikers],
+  lading_soort: [...mockLadingSoorten],
+  lading_subsoort: [...mockLadingSubsoorten],
+  bijzonderheid: [...mockBijzonderheden],
+  haven: [...havens],
+  bron: [...bronnen],
+  partij: [...partijen],
+  subpartij: [...subpartijen],
+  ex: [...exen],
+  lading_markt: [...ladingenMarkt],
+  lading_eigen: [...ladingenEigen],
+  vaartuig_markt: [...vaartuigenMarkt],
+  vaartuig_eigen: [...vaartuigenEigen],
+  onderhandeling: [...onderhandelingen],
+  bod: [...boden],
+};
+
+let nextId = 1000;
+function generateId(): string {
+  return `auto-${nextId++}`;
+}
+
+// ── CRUD operations (synchronous, wrapped in Promise for API compat) ──
 
 /** List all items of an entity type */
 export async function list<T = any>(entity: EntityType): Promise<T[]> {
-  return request<T[]>("GET", `/${entity}`);
+  return [...(store[entity] || [])] as T[];
 }
 
 /** Get a single item by ID */
 export async function get<T = any>(entity: EntityType, id: string): Promise<T> {
-  return request<T>("GET", `/${entity}/${id}`);
+  const item = (store[entity] || []).find((i: any) => i.id === id);
+  if (!item) throw new Error(`${entity} with id "${id}" not found`);
+  return { ...item } as T;
 }
 
 /** Create a new item (ID auto-generated if not provided) */
 export async function create<T = any>(entity: EntityType, data: Partial<T>): Promise<T> {
-  return request<T>("POST", `/${entity}`, data);
+  const item = { id: generateId(), ...data } as any;
+  store[entity].push(item);
+  return { ...item } as T;
 }
 
 /** Full update of an item */
 export async function update<T = any>(entity: EntityType, id: string, data: Partial<T>): Promise<T> {
-  return request<T>("PUT", `/${entity}/${id}`, data);
+  const arr = store[entity] || [];
+  const idx = arr.findIndex((i: any) => i.id === id);
+  if (idx === -1) throw new Error(`${entity} with id "${id}" not found`);
+  arr[idx] = { ...arr[idx], ...data, id };
+  return { ...arr[idx] } as T;
 }
 
 /** Partial update (merge fields) */
 export async function patch<T = any>(entity: EntityType, id: string, data: Partial<T>): Promise<T> {
-  return request<T>("PATCH", `/${entity}/${id}`, data);
+  return update<T>(entity, id, data);
 }
 
 /** Delete an item */
 export async function remove(entity: EntityType, id: string): Promise<void> {
-  await request<void>("DELETE", `/${entity}/${id}`);
+  const arr = store[entity] || [];
+  const idx = arr.findIndex((i: any) => i.id === id);
+  if (idx !== -1) arr.splice(idx, 1);
 }
 
 /** Get multiple items by their IDs */
 export async function batchGet<T = any>(entity: EntityType, ids: string[]): Promise<T[]> {
   if (ids.length === 0) return [];
-  return request<T[]>("POST", `/${entity}/batch`, { ids });
+  const idSet = new Set(ids);
+  return (store[entity] || []).filter((i: any) => idSet.has(i.id)).map((i: any) => ({ ...i })) as T[];
 }
 
 /** Create multiple items at once */
 export async function batchCreate<T = any>(entity: EntityType, items: Partial<T>[]): Promise<T[]> {
-  if (items.length === 0) return [];
-  return request<T[]>("POST", `/${entity}/batch-create`, { items });
+  return Promise.all(items.map(item => create<T>(entity, item)));
 }
 
-/** Seed the database with demo data */
+/** Seed — no-op for local store, data is already loaded */
 export async function seed(): Promise<string> {
-  const res = await fetch(`${BASE_URL}/seed`, {
-    method: "POST",
-    headers,
-  });
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error);
-  return json.message;
+  return "Lokale data is al geladen.";
 }
 
 /** Get entity counts */
 export async function stats(): Promise<Record<string, number>> {
-  return request<Record<string, number>>("GET", "/stats");
+  const result: Record<string, number> = {};
+  for (const [key, arr] of Object.entries(store)) {
+    result[key] = arr.length;
+  }
+  return result;
 }
 
 // ── Convenience: resolve relations ──
 
-/**
- * Fetches items and resolves specified relation fields.
- * Example: listWithRelations('lading_markt', { relatieId: 'relatie', laadhavenId: 'haven' })
- * Returns items with _resolved.relatieId, _resolved.laadhavenId etc.
- */
 export async function listWithRelations<T extends Record<string, any>>(
   entity: EntityType,
   relations: Record<string, EntityType>

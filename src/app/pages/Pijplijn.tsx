@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useDetailPanel } from "../components/DetailPanelContext";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import SegmentedButtonGroup from "../components/SegmentedButtonGroup";
@@ -14,6 +15,7 @@ import { usePijplijnData, usePijplijnVaartuigen, type PijplijnItem, type Pijplij
 export default function Pijplijn() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { openDetail } = useDetailPanel();
   const activeTab = location.pathname.includes('/vaartuigen') ? 'vaartuigen' : 'ladingen';
   const [sourceFilter, setSourceFilter] = useState<'alles' | 'eigen' | 'markt'>('alles');
   const [statusFilter, setStatusFilter] = useState('Alle statussen');
@@ -210,8 +212,7 @@ export default function Pijplijn() {
               columns={ladingenColumns}
               data={ladingenRows}
               onRowClick={(row) => {
-                const item = filteredLadingen.find(i => i.id === row.id);
-                navigate(`/markt/pijplijn/lading/${row.id}`, { state: { ladingType: item?.type || 'eigen' } });
+                openDetail('lading', row.id);
               }}
             />
           )}
@@ -221,8 +222,7 @@ export default function Pijplijn() {
               columns={vaartuigenColumns}
               data={vaartuigenRows}
               onRowClick={(row) => {
-                const item = filteredVaartuigen.find(i => i.id === row.id);
-                navigate(`/markt/pijplijn/vaartuig/${row.id}`, { state: { ladingType: item?.bron || 'markt', entityType: 'vaartuig' } });
+                openDetail('vaartuig', row.id);
               }}
             />
           )}

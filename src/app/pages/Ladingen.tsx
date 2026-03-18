@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
+import { useDetailPanel } from "../components/DetailPanelContext";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import Table from "../components/Table";
@@ -19,6 +20,7 @@ function formatDate(dateStr?: string): string {
 
 export default function Ladingen() {
   const navigate = useNavigate();
+  const { openDetail, activeDetail } = useDetailPanel();
   const [search, setSearch] = useState("");
   const [relatieFilter, setRelatieFilter] = useState<string[]>([]);
   const [ladingSoortFilter, setLadingSoortFilter] = useState<string[]>([]);
@@ -199,8 +201,9 @@ export default function Ladingen() {
           data={tableData}
           hoveredRowId={hoveredRow}
           onRowHover={setHoveredRow}
+          activeRowId={activeDetail?.type === 'lading' ? activeDetail.id : null}
           onRowClick={(row) => {
-            navigate(`/lading/${row.id}`);
+            openDetail('lading', row.id);
           }}
         />
       </div>

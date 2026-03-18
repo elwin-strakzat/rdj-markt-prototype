@@ -175,6 +175,8 @@ interface TableProps {
   data: RowData[];
   /** Row click handler */
   onRowClick?: (row: RowData) => void;
+  /** Id of the row that is currently active (e.g. open in a detail panel) */
+  activeRowId?: string | null;
   /** Enable row checkboxes */
   selectable?: boolean;
   selectedIds?: string[];
@@ -573,6 +575,7 @@ export default function Table({
   columns,
   data,
   onRowClick,
+  activeRowId,
   selectable = false,
   selectedIds = [],
   onSelectAll,
@@ -629,16 +632,18 @@ export default function Table({
       <div>
         {data.map((row, rowIndex) => {
           const isSelected = selectable && selectedIds.includes(row.id);
-          const bgCls = isSelected
+          const isActive = activeRowId === row.id;
+          const bgCls = isSelected || isActive
             ? "bg-rdj-bg-active hover:bg-rdj-bg-active-hover"
             : "hover:bg-rdj-bg-primary-hover";
 
           return (
           <div
             key={row.id}
-            className={`group/row flex items-center px-[24px] py-[16px] gap-[16px] border-b border-rdj-border-secondary ${bgCls} transition-colors`}
+            className={`group/row flex items-center px-[24px] py-[16px] gap-[16px] border-b border-rdj-border-secondary ${bgCls} transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
             onMouseEnter={() => onRowHover?.(row.id)}
             onMouseLeave={() => onRowHover?.(null)}
+            onClick={onRowClick ? () => onRowClick(row) : undefined}
           >
             {selectable && (
               <div className="w-[40px] shrink-0 flex items-center justify-center">

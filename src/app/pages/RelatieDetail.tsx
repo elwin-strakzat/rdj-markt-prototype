@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router";
+import { useDetailPanel } from "../components/DetailPanelContext";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import type { PageTab } from "../components/PageHeader";
@@ -51,6 +52,7 @@ const chevronSvg = (
 export default function RelatieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { openDetail } = useDetailPanel();
   const [activeTab, setActiveTab] = useState<"overzicht" | "ladingen" | "vaartuigen" | "deals" | "mail" | "gesprekken" | "activiteit">("overzicht");
   const [dealFilter, setDealFilter] = useState<"alle" | "spot" | "contract">("alle");
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -247,7 +249,7 @@ export default function RelatieDetail() {
                                     <tr
                                       key={l.id}
                                       className="border-b border-rdj-border-secondary last:border-b-0 hover:bg-[#f9fafb] cursor-pointer transition-colors"
-                                      onClick={() => navigate(`/crm/relatie/${id}/lading/${l.id}`)}
+                                      onClick={() => openDetail('lading', l.id)}
                                     >
                                       <td className="px-[12px] py-[10px]">
                                         <p className="font-sans font-bold text-[14px] text-rdj-text-primary">{l.titel}</p>
@@ -306,7 +308,7 @@ export default function RelatieDetail() {
                                     <tr
                                       key={v.id}
                                       className="border-b border-rdj-border-secondary last:border-b-0 hover:bg-[#f9fafb] cursor-pointer transition-colors"
-                                      onClick={() => navigate(`/crm/relatie/${id}/vaartuig/${v.id}`)}
+                                      onClick={() => openDetail('vaartuig', v.id)}
                                     >
                                       <td className="px-[12px] py-[10px] font-sans font-bold text-[14px] text-rdj-text-primary">{v.naam}</td>
                                       <td className="px-[12px] py-[10px] font-sans font-normal text-[14px] text-rdj-text-secondary">{v.type}</td>

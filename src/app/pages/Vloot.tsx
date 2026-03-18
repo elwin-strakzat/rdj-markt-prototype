@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
+import { useDetailPanel } from "../components/DetailPanelContext";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import type { PageTab } from "../components/PageHeader";
@@ -22,6 +23,7 @@ const STATUS_OPTIONS = ["Alle statussen", "Beschikbaar", "Werf", "Inactief"];
 
 export default function Vloot() {
   const navigate = useNavigate();
+  const { openDetail } = useDetailPanel();
   const [activeTab, setActiveTab] = useState("alle");
   const [search, setSearch] = useState("");
   const [bindingFilter, setBindingFilter] = useState<string[]>([]);
@@ -338,7 +340,7 @@ export default function Vloot() {
           hoveredRowId={hoveredRow}
           onRowHover={setHoveredRow}
           onRowClick={(row) => {
-            navigate(`/vloot/${row.id}`);
+            openDetail('vaartuig', row.id);
           }}
         />
 
