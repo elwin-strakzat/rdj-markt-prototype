@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import DetailsSidebar, { DetailsSidebarSection } from "./DetailsSidebar";
 import DetailRow from "./DetailRow";
 import Button from "./Button";
@@ -24,6 +25,7 @@ interface VaartuigMarktSidebarProps {
 }
 
 export default function VaartuigMarktSidebar({ id, onEdit, onResetToBron }: VaartuigMarktSidebarProps) {
+  const navigate = useNavigate();
   const { data, loading, error } = useVaartuigMarktDetail(id);
   const [activeTab, setActiveTab] = useState<string>("details");
 
@@ -69,7 +71,7 @@ export default function VaartuigMarktSidebar({ id, onEdit, onResetToBron }: Vaar
         <DetailRow label="Kruiphoogte" value={data.kruiphoogte} editable onEdit={() => onEdit?.("kruiphoogte")} />
         <DetailRow label="Bijzonderheden" type="badges" badges={data.bijzonderheden} editable onEdit={() => onEdit?.("bijzonderheden")} />
         <DetailRow label="Bron" type="linked" value={data.bron} subtext={data.bronDatum} />
-        <DetailRow label="Relatie" type="linked" value={data.relatie} />
+        <DetailRow label="Relatie" type="linked" value={data.relatie} onClick={() => navigate(`/crm/relatie/${data.relatieId}`)} />
         <DetailRow label="Contactpersoon" value={data.contactpersoon} />
       </DetailsSidebarSection>
 

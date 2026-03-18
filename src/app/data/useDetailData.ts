@@ -96,6 +96,7 @@ export interface ResolvedLadingMarkt {
   losdatum: string;
   bron: string;
   bronDatum: string;
+  relatieId: string;
   relatie: string;
   contactpersoon: string;
   eigenaar: string;
@@ -127,6 +128,7 @@ export interface ResolvedLadingEigen {
   loshaven: string;
   loshavenCity: string;
   losdatum: string;
+  relatieId: string;
   relatie: string;
   contactpersoon: string;
   eigenaar: string;
@@ -163,6 +165,7 @@ export interface ResolvedVaartuigMarkt {
   bijzonderheden: string[];
   bron: string;
   bronDatum: string;
+  relatieId: string;
   relatie: string;
   contactpersoon: string;
   eigenaar: string;
@@ -185,6 +188,7 @@ export interface ResolvedVaartuigEigen {
   diepgang: string;
   kruiphoogte: string;
   bijzonderheden: string[];
+  relatieId: string;
   relatie: string;
   contactpersoon: string;
   eigenaar: string;
@@ -248,6 +252,7 @@ export function useLadingMarktDetail(id: string | undefined) {
           losdatum: item.losdatum || "Af te stemmen",
           bron: bron?.titel || "—",
           bronDatum: bron?.datum || "",
+          relatieId: item.relatieId,
           relatie: relatie?.naam || "—",
           contactpersoon: contact?.naam || "—",
           eigenaar: eigenaar?.naam || "—",
@@ -339,6 +344,7 @@ export function useLadingEigenDetail(id: string | undefined) {
           loshaven: loshaven?.naam || "—",
           loshavenCity: "",
           losdatum: subpartij?.losdatum || "Af te stemmen",
+          relatieId: item.relatieId,
           relatie: relatie?.naam || "—",
           contactpersoon: contact?.naam || "—",
           eigenaar: eigenaar?.naam || "—",
@@ -419,6 +425,7 @@ export function useVaartuigMarktDetail(id: string | undefined) {
           bijzonderheden: bijz,
           bron: bron?.titel || "—",
           bronDatum: bron?.datum || "",
+          relatieId: item.relatieId,
           relatie: relatie?.naam || "—",
           contactpersoon: contact?.naam || "—",
           eigenaar: eigenaar?.naam || "—",
@@ -482,6 +489,7 @@ export function useVaartuigEigenDetail(id: string | undefined) {
           diepgang: `${fmt(item.diepgang)} m`,
           kruiphoogte: `${fmt(item.kruiphoogte)} m`,
           bijzonderheden: bijz,
+          relatieId: item.relatieId,
           relatie: maps.relaties.get(item.relatieId)?.naam || "—",
           contactpersoon: maps.contactPersonen.get(maps.relaties.get(item.relatieId)?.contactPersoonIds?.[0] || "")?.naam || "—",
           eigenaar: eigenaar?.naam || "—",

@@ -59,7 +59,7 @@ export default function InboxCargoDetail() {
   // Table columns for vessel matches
   const matchColumns: Column[] = [
     { key: "name", header: "Naam", type: "leading-text", subtextKey: "subtype", badgeKey: "statusBadge", actionLabel: "Onderhandeling" },
-    { key: "company", header: "Relatie", type: "text", subtextKey: "contact", textColor: "text-rdj-text-brand", width: "w-[180px]" },
+    { key: "company", header: "Relatie", type: "text", subtextKey: "contact", textColor: "text-rdj-text-brand", width: "w-[180px]", onClickKey: "onRelatieClick" },
     { key: "location", header: "Locatie", type: "text", subtextKey: "locationDate", width: "w-[200px]" },
     { key: "capacity", header: "Groottonnage", type: "text", width: "w-[140px]" },
     { key: "content", header: "Inhoud", type: "text", width: "w-[100px]" },
@@ -81,8 +81,8 @@ export default function InboxCargoDetail() {
 
   // Mock match data
   const matchRows: RowData[] = [
-    { id: "1", name: "Aar", subtype: "Motorschip", statusBadge: offeredMatches.has("1") ? "Aangeboden" : undefined, company: "Andermans B.V.", contact: "Cees Andoormans", location: "Europahafen (Maassluis)", locationDate: "Vanaf Ma 13 Jan, 2025", capacity: "3.519 mt", content: "4.200 m³", matchPct: 90 },
-    { id: "2", name: "Agaat", subtype: "Motorschip", statusBadge: offeredMatches.has("2") ? "Aangeboden" : undefined, company: "Markel Freight B.V.", contact: "H.Q. Duivenvoorde", location: "Maasvlakte", locationDate: "Vanaf Di 14 Jan, 2025", capacity: "2.085 mt", content: "2.500 m³", matchPct: 85 },
+    { id: "1", name: "Aar", subtype: "Motorschip", statusBadge: offeredMatches.has("1") ? "Aangeboden" : undefined, company: "Andermans B.V.", contact: "Cees Andoormans", location: "Europahafen (Maassluis)", locationDate: "Vanaf Ma 13 Jan, 2025", capacity: "3.519 mt", content: "4.200 m³", matchPct: 90, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Andermans B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "2", name: "Agaat", subtype: "Motorschip", statusBadge: offeredMatches.has("2") ? "Aangeboden" : undefined, company: "Markel Freight B.V.", contact: "H.Q. Duivenvoorde", location: "Maasvlakte", locationDate: "Vanaf Di 14 Jan, 2025", capacity: "2.085 mt", content: "2.500 m³", matchPct: 85, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Markel Freight B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
   ];
 
   const handleMatchClick = (row: RowData) => {

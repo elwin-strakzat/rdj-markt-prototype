@@ -56,7 +56,7 @@ export default function InboxVesselDetail() {
   // Table columns for cargo matches (ladingen die passen bij dit vaartuig)
   const matchColumns: Column[] = [
     { key: "lading", header: "Lading", type: "leading-text", subtextKey: "ladingSubtext", actionLabel: "Onderhandeling" },
-    { key: "relatie", header: "Relatie", type: "text", subtextKey: "relatieContact", textColor: "text-rdj-text-brand", width: "w-[180px]" },
+    { key: "relatie", header: "Relatie", type: "text", subtextKey: "relatieContact", textColor: "text-rdj-text-brand", width: "w-[180px]", onClickKey: "onRelatieClick" },
     { key: "laden", header: "Laden", type: "text", subtextKey: "ladenDatum", width: "w-[140px]" },
     { key: "lossen", header: "Lossen", type: "text", subtextKey: "lossenDatum", width: "w-[140px]" },
     {
@@ -77,9 +77,9 @@ export default function InboxVesselDetail() {
 
   // Mock match data for vessel
   const matchRows: RowData[] = [
-    { id: "1", lading: "3.000 ton Houtpellets (0571)", ladingSubtext: "Eigen", relatie: "Rederij de Jong", relatieContact: undefined, laden: "Rotterdam Botlek", ladenDatum: "Mrt 2025", lossen: "Deventer IJssel", lossenDatum: "Mrt 2025", matchPct: 90 },
-    { id: "2", lading: "1.000 - 2.000 ton Hout", ladingSubtext: "Openen (1)", relatie: "Markel Freight B.V.", relatieContact: "H.Q. Duivenvoorde", laden: "Moerdijk Industriehaven", ladenDatum: "Jan 2024", lossen: "Amsterdam Westhaven", lossenDatum: "Jan 2024", matchPct: 75 },
-    { id: "3", lading: "Af te stemmen ton Houtpellets", ladingSubtext: undefined, relatie: "Buiten Onszelf N.V.", relatieContact: "Lisa Aelbrechtse", laden: "Antwerpen", ladenDatum: "Do 10 Jan: 10:00", lossen: "Rotterdam Europoort", lossenDatum: "Mrt 2025", matchPct: 60 },
+    { id: "1", lading: "3.000 ton Houtpellets (0571)", ladingSubtext: "Eigen", relatie: "Rederij de Jong", relatieContact: undefined, laden: "Rotterdam Botlek", ladenDatum: "Mrt 2025", lossen: "Deventer IJssel", lossenDatum: "Mrt 2025", matchPct: 90, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Rederij de Jong"); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "2", lading: "1.000 - 2.000 ton Hout", ladingSubtext: "Openen (1)", relatie: "Markel Freight B.V.", relatieContact: "H.Q. Duivenvoorde", laden: "Moerdijk Industriehaven", ladenDatum: "Jan 2024", lossen: "Amsterdam Westhaven", lossenDatum: "Jan 2024", matchPct: 75, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Markel Freight B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "3", lading: "Af te stemmen ton Houtpellets", ladingSubtext: undefined, relatie: "Buiten Onszelf N.V.", relatieContact: "Lisa Aelbrechtse", laden: "Antwerpen", ladenDatum: "Do 10 Jan: 10:00", lossen: "Rotterdam Europoort", lossenDatum: "Mrt 2025", matchPct: 60, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Buiten Onszelf N.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
   ];
 
   return (

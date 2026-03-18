@@ -12,6 +12,7 @@ import NegotiationDialog from "./NegotiationDialog";
 import ConversationDialog from "./ConversationDialog";
 import { DetailsSidebarSection } from "./DetailsSidebar";
 import DetailRow from "./DetailRow";
+import { useNavigate } from "react-router";
 import { useBevrachtingVaartuigSummary, useVaartuigEigenDetail, useVaartuigMarktDetail } from "../data/useDetailData";
 import { mockRelaties } from "../data/mock-relatie-data";
 import svgPaths from "../../imports/svg-62fj7rjvas";
@@ -94,7 +95,7 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
 
   const matchColumns: Column[] = [
     { key: 'cargo', header: 'Lading', type: 'leading-text', badgeKey: 'eigenBadge', actionLabel: 'Onderhandeling' },
-    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[160px]' },
+    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[160px]', onClickKey: 'onRelatieClick' },
     { key: 'laadHaven', header: 'Laden', type: 'text', subtextKey: 'laadDatum', width: 'w-[160px]' },
     { key: 'losHaven', header: 'Lossen', type: 'text', subtextKey: 'losDatum', width: 'w-[160px]' },
     { key: 'matchPercentage', header: 'Match', type: 'progress', align: 'right', width: 'w-[100px]' },
@@ -107,12 +108,14 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
     </svg>
   );
 
+  const navigate = useNavigate();
   const matchTableData: RowData[] = vesselMatches.map((m) => ({
     id: m.id,
     cargo: m.cargo,
     eigenBadge: m.isEigen ? undefined : 'Markt',
     company: m.company,
     contactPersoon: m.contactPersoon,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === m.company); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     laadHaven: m.laadHaven,
     laadDatum: m.laadDatum,
     losHaven: m.losHaven,
@@ -304,6 +307,7 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
 /* ── Inline sidebar content components (renders content without DetailsSidebar wrapper) ── */
 
 function VaartuigEigenSidebarContent({ id }: { id: string }) {
+  const navigate = useNavigate();
   const { data, loading, error } = useVaartuigEigenDetail(id);
 
   if (loading) {
@@ -337,7 +341,7 @@ function VaartuigEigenSidebarContent({ id }: { id: string }) {
         <DetailRow label="Diepgang" value={data.diepgang} editable />
         <DetailRow label="Kruiphoogte" value={data.kruiphoogte} editable />
         <DetailRow label="Bijzonderheden" type="badges" badges={data.bijzonderheden} editable />
-        <DetailRow label="Relatie" type="linked" value={data.relatie} />
+        <DetailRow label="Relatie" type="linked" value={data.relatie} onClick={() => navigate(`/crm/relatie/${data.relatieId}`)} />
         <DetailRow label="Contactpersoon" value={data.contactpersoon} />
       </DetailsSidebarSection>
       <div className="w-full h-px bg-rdj-border-secondary shrink-0" />
@@ -350,6 +354,7 @@ function VaartuigEigenSidebarContent({ id }: { id: string }) {
 }
 
 function VaartuigMarktSidebarContent({ id }: { id: string }) {
+  const navigate = useNavigate();
   const { data, loading, error } = useVaartuigMarktDetail(id);
 
   if (loading) {
@@ -386,7 +391,7 @@ function VaartuigMarktSidebarContent({ id }: { id: string }) {
         <DetailRow label="Kruiphoogte" value={data.kruiphoogte} editable />
         <DetailRow label="Bijzonderheden" type="badges" badges={data.bijzonderheden} editable />
         <DetailRow label="Bron" type="linked" value={data.bron} subtext={data.bronDatum} />
-        <DetailRow label="Relatie" type="linked" value={data.relatie} />
+        <DetailRow label="Relatie" type="linked" value={data.relatie} onClick={() => navigate(`/crm/relatie/${data.relatieId}`)} />
         <DetailRow label="Contactpersoon" value={data.contactpersoon} />
       </DetailsSidebarSection>
       <div className="w-full h-px bg-rdj-border-secondary shrink-0" />

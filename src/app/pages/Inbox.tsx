@@ -12,6 +12,7 @@ import Table from "../components/Table";
 import type { Column } from "../components/Table";
 import svgPaths from "../../imports/svg-5yigdc067t";
 import { useInboxLadingen, updateLadingMarktPriority } from "../data/useMarktData";
+import { mockRelaties } from "../data/mock-relatie-data";
 import * as apiClient from "../data/api";
 
 type InboxSubView = 'te-beoordelen' | 'interessant' | 'archief';
@@ -360,7 +361,7 @@ export default function Inbox() {
 
   const columns: Column[] = [
     { key: 'title', header: 'Lading', type: 'leading-text' },
-    { key: 'relation', header: 'Relatie', type: 'text', width: 'w-[180px]', textColor: 'text-rdj-text-brand', subtextKey: 'relationLink' },
+    { key: 'relation', header: 'Relatie', type: 'text', width: 'w-[180px]', textColor: 'text-rdj-text-brand', subtextKey: 'relationLink', onClickKey: 'onRelatieClick' },
     { key: 'loadLocation', header: 'Laden', type: 'text', width: 'w-[180px]', editable: true },
     { key: 'unloadLocation', header: 'Lossen', type: 'text', width: 'w-[180px]', editable: true },
     {
@@ -392,6 +393,7 @@ export default function Inbox() {
     title: item.title,
     relation: item.relation,
     relationLink: item.relationLink,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === item.relation); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     loadLocation: item.loadLocation,
     unloadLocation: item.unloadLocation,
     matches: item.matches,

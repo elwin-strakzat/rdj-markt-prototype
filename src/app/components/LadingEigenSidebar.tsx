@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import DetailsSidebar, { DetailsSidebarSection } from "./DetailsSidebar";
 import DetailRow from "./DetailRow";
 import { useLadingEigenDetail } from "../data/useDetailData";
@@ -22,6 +23,7 @@ interface LadingEigenSidebarProps {
 }
 
 export default function LadingEigenSidebar({ id, onEdit }: LadingEigenSidebarProps) {
+  const navigate = useNavigate();
   const { data, loading, error } = useLadingEigenDetail(id);
   const [activeTab, setActiveTab] = useState<string>("details");
 
@@ -88,7 +90,7 @@ export default function LadingEigenSidebar({ id, onEdit }: LadingEigenSidebarPro
             <DetailRow label="Laaddatum" value={data.laaddatum} editable onEdit={() => onEdit?.("laaddatum")} />
             <DetailRow label="Loshaven" value={data.loshaven} editable onEdit={() => onEdit?.("loshaven")} />
             <DetailRow label="Losdatum" value={data.losdatum} editable onEdit={() => onEdit?.("losdatum")} />
-            <DetailRow label="Relatie" type="linked" value={data.relatie} />
+            <DetailRow label="Relatie" type="linked" value={data.relatie} onClick={() => navigate(`/crm/relatie/${data.relatieId}`)} />
             <DetailRow label="Contactpersoon" value={data.contactpersoon} />
           </DetailsSidebarSection>
 

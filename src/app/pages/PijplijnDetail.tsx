@@ -200,7 +200,7 @@ export default function PijplijnDetail() {
 
   const ladingMatchColumns: Column[] = [
     { key: 'name', header: 'Vaartuig', type: 'leading-text', subtextKey: 'type', badgeKey: 'eigenBadge', actionLabel: 'Onderhandeling' },
-    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]' },
+    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]', onClickKey: 'onRelatieClick' },
     { key: 'location', header: 'Locatie', type: 'text', subtextKey: 'locationDate', width: 'w-[200px]' },
     { key: 'capacity', header: 'Groottonnage', type: 'text', align: 'right', width: 'w-[120px]' },
     { key: 'inhoud', header: 'Inhoud', type: 'text', align: 'right', width: 'w-[100px]' },
@@ -215,6 +215,7 @@ export default function PijplijnDetail() {
     eigenBadge: m.isEigen ? undefined : 'Markt',
     company: m.company,
     contactPersoon: m.contactPersoon,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === m.company); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     location: m.location,
     locationDate: m.locationDate,
     capacity: m.capacity,
@@ -228,7 +229,7 @@ export default function PijplijnDetail() {
 
   const vaartuigMatchColumns: Column[] = [
     { key: 'lading', header: 'Lading', type: 'leading-text', badgeKey: 'eigenBadge', actionLabel: 'Onderhandeling' },
-    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]' },
+    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]', onClickKey: 'onRelatieClick' },
     { key: 'laden', header: 'Laden', type: 'text', subtextKey: 'ladenDatum', width: 'w-[180px]' },
     { key: 'lossen', header: 'Lossen', type: 'text', subtextKey: 'lossenDatum', width: 'w-[180px]' },
     { key: 'source', header: 'Bron', type: 'text', subtextKey: 'sourceDate', featuredIconKey: 'sourceIcon', featuredIconVariantKey: 'sourceIconVariant', width: 'w-[180px]' },
@@ -241,6 +242,7 @@ export default function PijplijnDetail() {
     eigenBadge: m.isEigen ? undefined : 'Markt',
     company: m.company,
     contactPersoon: m.contactPersoon,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === m.company); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     laden: m.laden,
     ladenDatum: m.ladenDatum,
     lossen: m.lossen,

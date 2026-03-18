@@ -132,7 +132,7 @@ export default function LadingDetail() {
   /* ── Matches table ── */
   const matchColumns: Column[] = [
     { key: 'name', header: 'Vaartuig', type: 'leading-text', subtextKey: 'type', badgeKey: 'eigenBadge', actionLabel: 'Onderhandeling' },
-    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]' },
+    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]', onClickKey: 'onRelatieClick' },
     { key: 'location', header: 'Locatie', type: 'text', subtextKey: 'locationDate', width: 'w-[200px]' },
     { key: 'distance', header: 'Groottonnage', type: 'text', align: 'right', width: 'w-[120px]' },
     { key: 'inhoud', header: 'Inhoud', type: 'text', align: 'right', width: 'w-[100px]' },
@@ -154,6 +154,7 @@ export default function LadingDetail() {
     eigenBadge: match.isEigen ? undefined : 'Markt',
     company: match.company,
     contactPersoon: match.contactPersoon || match.companyLocation,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === match.company); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     location: match.location,
     locationDate: match.locationDate || '',
     distance: match.distance,

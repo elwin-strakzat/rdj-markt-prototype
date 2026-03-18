@@ -11,6 +11,7 @@ import Pagination from "../components/Pagination";
 import Table from "../components/Table";
 import type { Column } from "../components/Table";
 import { useInboxVaartuigen, updateVaartuigMarktPriority } from "../data/useMarktData";
+import { mockRelaties } from "../data/mock-relatie-data";
 import * as apiClient from "../data/api";
 
 type InboxSubView = 'te-beoordelen' | 'interessant' | 'archief';
@@ -349,7 +350,7 @@ export default function InboxVessels() {
 
   const columns: Column[] = [
     { key: 'name', header: 'Naam', type: 'leading-text', subtextKey: 'type', dotKey: 'isNew', sortActive: true, sortDirection: 'desc' },
-    { key: 'relation', header: 'Relatie', type: 'text', width: 'w-[180px]', textColor: 'text-rdj-text-brand', subtextKey: 'relationContact' },
+    { key: 'relation', header: 'Relatie', type: 'text', width: 'w-[180px]', textColor: 'text-rdj-text-brand', subtextKey: 'relationContact', onClickKey: 'onRelatieClick' },
     { key: 'location', header: 'Locatie', type: 'text', width: 'w-[140px]', editable: true },
     { key: 'availableFromDate', header: 'Beschikbaar vanaf', type: 'text', width: 'w-[140px]', subtextKey: 'availableFromTime', editable: true },
     { key: 'cargoTypesBadges', header: 'Bijzonderheden', type: 'badges', width: 'w-[160px]' },
@@ -393,6 +394,7 @@ export default function InboxVessels() {
       isNew: item.id === '1',
       relation: item.relation,
       relationContact: item.relationContact,
+      onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === item.relation); if (rel) navigate(`/crm/relatie/${rel.id}`); },
       location: item.location,
       availableFromDate,
       availableFromTime,

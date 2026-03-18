@@ -12,6 +12,7 @@ import NegotiationDialog from "./NegotiationDialog";
 import ConversationDialog from "./ConversationDialog";
 import { DetailsSidebarSection } from "./DetailsSidebar";
 import DetailRow from "./DetailRow";
+import { useNavigate } from "react-router";
 import { useBevrachtingLadingSummary, useLadingEigenDetail, useLadingMarktDetail } from "../data/useDetailData";
 import { updateLadingMarktPriority } from "../data/useMarktData";
 import { mockMatches, mockNegotiations } from "../data/mock-data";
@@ -81,7 +82,7 @@ export default function LadingDetailPanel({ id, onClose }: LadingDetailPanelProp
 
   const matchColumns: Column[] = [
     { key: 'name', header: 'Vaartuig', type: 'leading-text', subtextKey: 'type', badgeKey: 'eigenBadge', actionLabel: 'Onderhandeling' },
-    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[160px]' },
+    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[160px]', onClickKey: 'onRelatieClick' },
     { key: 'location', header: 'Locatie', type: 'text', subtextKey: 'locationDate', width: 'w-[160px]' },
     { key: 'distance', header: 'Groottonnage', type: 'text', align: 'right', width: 'w-[100px]' },
     { key: 'matchPercentage', header: 'Match', type: 'progress', align: 'right', width: 'w-[100px]' },
@@ -94,6 +95,7 @@ export default function LadingDetailPanel({ id, onClose }: LadingDetailPanelProp
     </svg>
   );
 
+  const navigate = useNavigate();
   const matchTableData: RowData[] = mockMatches.map((match) => ({
     id: match.id,
     name: match.name,
@@ -101,6 +103,7 @@ export default function LadingDetailPanel({ id, onClose }: LadingDetailPanelProp
     eigenBadge: match.isEigen ? undefined : 'Markt',
     company: match.company,
     contactPersoon: match.contactPersoon || match.companyLocation,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === match.company); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     location: match.location,
     locationDate: match.locationDate || '',
     distance: match.distance,
@@ -283,6 +286,7 @@ export default function LadingDetailPanel({ id, onClose }: LadingDetailPanelProp
 /* ── Inline sidebar content ── */
 
 function LadingEigenSidebarContent({ id }: { id: string }) {
+  const navigate = useNavigate();
   const eigenResult = useLadingEigenDetail(id);
   const marktResult = useLadingMarktDetail(id);
   const [activeTab, setActiveTab] = useState<string>("details");
@@ -354,7 +358,7 @@ function LadingEigenSidebarContent({ id }: { id: string }) {
             <DetailRow label="Laaddatum" value={data.laaddatum} editable />
             <DetailRow label="Loshaven" value={data.loshaven} editable />
             <DetailRow label="Losdatum" value={data.losdatum} editable />
-            <DetailRow label="Relatie" type="linked" value={data.relatie} />
+            <DetailRow label="Relatie" type="linked" value={data.relatie} onClick={() => navigate(`/crm/relatie/${data.raw.relatieId}`)} />
             <DetailRow label="Contactpersoon" value={data.contactpersoon} />
           </DetailsSidebarSection>
           <div className="w-full h-px bg-rdj-border-secondary shrink-0" />
@@ -380,7 +384,7 @@ function LadingEigenSidebarContent({ id }: { id: string }) {
             <DetailRow label="Loshaven" value={marktData.loshaven} editable />
             <DetailRow label="Losdatum" value={marktData.losdatum} editable />
             <DetailRow label="Bron" value={marktData.bron} />
-            <DetailRow label="Relatie" type="linked" value={marktData.relatie} />
+            <DetailRow label="Relatie" type="linked" value={marktData.relatie} onClick={() => navigate(`/crm/relatie/${marktData.raw.relatieId}`)} />
             <DetailRow label="Contactpersoon" value={marktData.contactpersoon} />
           </DetailsSidebarSection>
           <div className="w-full h-px bg-rdj-border-secondary shrink-0" />

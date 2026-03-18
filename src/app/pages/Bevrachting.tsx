@@ -14,6 +14,7 @@ import Table from "../components/Table";
 import type { Column } from "../components/Table";
 import Pagination from "../components/Pagination";
 import { mockCargos, mockVessels, Cargo, Vessel } from "../data/mock-data";
+import { mockRelaties } from "../data/mock-relatie-data";
 import svgPaths from "../../imports/svg-5lxjaeghl9";
 import FloatingActionBar from "../components/FloatingActionBar";
 import { useBevrachtingData, type BevrachtingCargo, type BevrachtingVessel } from "../data/useMarktData";
@@ -121,7 +122,7 @@ export default function Bevrachting() {
     { key: 'tonnage', header: 'Tonnage', type: 'text', width: 'w-[120px]', align: 'right' },
     { key: 'laden', header: 'Laden', type: 'text', width: 'w-[180px]', subtextKey: 'ladenDate' },
     { key: 'lossen', header: 'Lossen', type: 'text', width: 'w-[180px]', subtextKey: 'lossenDate' },
-    { key: 'relatie', header: 'Relatie', type: 'text', width: 'w-[180px]', textColor: 'text-rdj-text-brand' },
+    { key: 'relatie', header: 'Relatie', type: 'text', width: 'w-[180px]', textColor: 'text-rdj-text-brand', onClickKey: 'onRelatieClick' },
     { key: 'biedingenBadges', header: 'Biedingen', type: 'badges', width: 'w-[100px]' },
     { key: 'matchesBadges', header: 'Matches', type: 'badges', width: 'w-[100px]' },
     { key: 'deadline', header: 'Deadline', type: 'text', width: 'w-[140px]' },
@@ -182,6 +183,7 @@ export default function Bevrachting() {
       lossen: c.to,
       lossenDate: c.toDate,
       relatie: c.company ?? '',
+      onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === c.company); if (rel) navigate(`/crm/relatie/${rel.id}`); },
       biedingenBadges: c.bids != null ? [`${c.bids}`] : [],
       matchesBadges: c.matches != null ? [`${c.matches}`] : [],
       deadline: deadlineMap[c.status] ?? '',

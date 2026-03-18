@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import type { PageTab } from "../components/PageHeader";
@@ -32,6 +32,7 @@ const chevronSvg = (
 
 export default function CrmVaartuigDetail() {
   const { id, relatieId } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"matches" | "onderhandelingen" | "activiteit">("matches");
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [matchPage, setMatchPage] = useState(1);
@@ -104,7 +105,7 @@ export default function CrmVaartuigDetail() {
 
   const matchColumns: Column[] = [
     { key: "cargo", header: "Lading", type: "leading-text", badgeKey: "eigenBadge", actionLabel: "Onderhandeling" },
-    { key: "company", header: "Relatie", type: "text", subtextKey: "contactPersoon", textColor: "text-rdj-text-brand", width: "w-[180px]" },
+    { key: "company", header: "Relatie", type: "text", subtextKey: "contactPersoon", textColor: "text-rdj-text-brand", width: "w-[180px]", onClickKey: "onRelatieClick" },
     { key: "laadHaven", header: "Laden", type: "text", subtextKey: "laadDatum", width: "w-[180px]" },
     { key: "losHaven", header: "Lossen", type: "text", subtextKey: "losDatum", width: "w-[180px]" },
     { key: "source", header: "Bron", type: "text", subtextKey: "sourceDate", featuredIconKey: "sourceIcon", featuredIconVariantKey: "sourceIconVariant", width: "w-[180px]" },
@@ -117,6 +118,7 @@ export default function CrmVaartuigDetail() {
     eigenBadge: m.isEigen ? undefined : "Markt",
     company: m.relatie,
     contactPersoon: m.contactPersoon,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === m.relatie); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     laadHaven: m.laadHaven,
     laadDatum: m.laadDatum,
     losHaven: m.losHaven,

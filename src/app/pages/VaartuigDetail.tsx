@@ -146,7 +146,7 @@ export default function VaartuigDetail() {
   /* ── Matches table columns ── */
   const matchColumns: Column[] = [
     { key: 'cargo', header: 'Lading', type: 'leading-text', badgeKey: 'eigenBadge', actionLabel: 'Onderhandeling' },
-    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]' },
+    { key: 'company', header: 'Relatie', type: 'text', subtextKey: 'contactPersoon', textColor: 'text-rdj-text-brand', width: 'w-[180px]', onClickKey: 'onRelatieClick' },
     { key: 'laadHaven', header: 'Laden', type: 'text', subtextKey: 'laadDatum', width: 'w-[180px]' },
     { key: 'losHaven', header: 'Lossen', type: 'text', subtextKey: 'losDatum', width: 'w-[180px]' },
     { key: 'source', header: 'Bron', type: 'text', subtextKey: 'sourceDate', featuredIconKey: 'sourceIcon', featuredIconVariantKey: 'sourceIconVariant', width: 'w-[180px]' },
@@ -166,6 +166,7 @@ export default function VaartuigDetail() {
     eigenBadge: m.isEigen ? undefined : 'Markt',
     company: m.company,
     contactPersoon: m.contactPersoon,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === m.company); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     laadHaven: m.laadHaven,
     laadDatum: m.laadDatum,
     losHaven: m.losHaven,

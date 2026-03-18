@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/PageHeader";
 import type { PageTab } from "../components/PageHeader";
@@ -32,6 +32,7 @@ const chevronSvg = (
 
 export default function CrmLadingDetail() {
   const { id, relatieId } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"matches" | "onderhandelingen" | "activiteit">("matches");
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [matchPage, setMatchPage] = useState(1);
@@ -104,7 +105,7 @@ export default function CrmLadingDetail() {
 
   const matchColumns: Column[] = [
     { key: "name", header: "Vaartuig", type: "leading-text", subtextKey: "type", badgeKey: "eigenBadge", actionLabel: "Onderhandeling" },
-    { key: "company", header: "Relatie", type: "text", subtextKey: "contactPersoon", textColor: "text-rdj-text-brand", width: "w-[180px]" },
+    { key: "company", header: "Relatie", type: "text", subtextKey: "contactPersoon", textColor: "text-rdj-text-brand", width: "w-[180px]", onClickKey: "onRelatieClick" },
     { key: "location", header: "Locatie", type: "text", subtextKey: "locationDate", width: "w-[200px]" },
     { key: "distance", header: "Groottonnage", type: "text", align: "right", width: "w-[120px]" },
     { key: "inhoud", header: "Inhoud", type: "text", align: "right", width: "w-[100px]" },
@@ -119,6 +120,7 @@ export default function CrmLadingDetail() {
     eigenBadge: m.isEigen ? undefined : "Markt",
     company: m.relatie,
     contactPersoon: m.contactPersoon,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === m.relatie); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     location: m.locatie,
     locationDate: m.locatieDatum,
     distance: m.groottonnage,

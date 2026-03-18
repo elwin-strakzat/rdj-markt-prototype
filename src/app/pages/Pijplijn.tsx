@@ -10,6 +10,7 @@ import type { Column } from "../components/Table";
 import svgPaths from "../../imports/svg-q07ncv0e2v";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
 import { usePijplijnData, usePijplijnVaartuigen, type PijplijnItem, type PijplijnVaartuigItem } from "../data/useMarktData";
+import { mockRelaties } from "../data/mock-relatie-data";
 
 export default function Pijplijn() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export default function Pijplijn() {
     { key: 'status', header: 'Status', type: 'status', width: 'w-[160px]', variantKey: 'statusVariant', defaultVariant: 'grey' as const },
     { key: 'negotiations', header: 'Onderhandeling', type: 'badges', width: 'w-[140px]', defaultVariant: 'grey' as const },
     { key: 'matches', header: 'Matches', type: 'badges', width: 'w-[80px]', defaultVariant: 'grey' as const },
-    { key: 'relation', header: 'Relatie', type: 'text', width: 'w-[180px]', subtextKey: 'relationContact', textColor: 'text-rdj-text-brand' },
+    { key: 'relation', header: 'Relatie', type: 'text', width: 'w-[180px]', subtextKey: 'relationContact', textColor: 'text-rdj-text-brand', onClickKey: 'onRelatieClick' },
     { key: 'loadLocation', header: 'Laden', type: 'text', width: 'w-[180px]', subtextKey: 'loadDate' },
     { key: 'unloadLocation', header: 'Lossen', type: 'text', width: 'w-[180px]', subtextKey: 'unloadDate' },
     { key: 'source', header: 'Bron', type: 'text', width: 'w-[140px]', subtextKey: 'sourceDate', featuredIconKey: 'sourceIcon', featuredIconVariantKey: 'sourceIconVariant', avatarSrcKey: 'sourceAvatarSrc' },
@@ -67,7 +68,7 @@ export default function Pijplijn() {
     { key: 'beschikbaarVanaf', header: 'Beschikbaar vanaf', type: 'text', width: 'w-[140px]' },
     { key: 'biedingen', header: 'Biedingen', type: 'badges', width: 'w-[100px]', defaultVariant: 'grey' as const },
     { key: 'matches', header: 'Matches', type: 'badges', width: 'w-[80px]', defaultVariant: 'grey' as const },
-    { key: 'relatie', header: 'Relatie', type: 'text', width: 'w-[180px]', subtextKey: 'relatieContact', textColor: 'text-rdj-text-brand' },
+    { key: 'relatie', header: 'Relatie', type: 'text', width: 'w-[180px]', subtextKey: 'relatieContact', textColor: 'text-rdj-text-brand', onClickKey: 'onRelatieClick' },
     { key: 'bijzonderheden', header: 'Bijzonderheden', type: 'badges', width: 'w-[140px]', defaultVariant: 'grey' as const },
     { key: 'binding', header: 'Binding', type: 'text', width: 'w-[100px]' },
     { key: 'groottonnage', header: 'Groottonnage', type: 'text', width: 'w-[120px]', align: 'right' },
@@ -93,6 +94,7 @@ export default function Pijplijn() {
       matches: [`${item.matches}`],
       relation: item.relation,
       relationContact: item.relationContact,
+      onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === item.relation); if (rel) navigate(`/crm/relatie/${rel.id}`); },
       loadLocation: item.loadLocation,
       loadDate: item.loadDate,
       unloadLocation: item.unloadLocation,
@@ -134,6 +136,7 @@ export default function Pijplijn() {
     matches: [`${item.matches}`],
     relatie: item.relatie,
     relatieContact: item.relatieContact,
+    onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === item.relatie); if (rel) navigate(`/crm/relatie/${rel.id}`); },
     bijzonderheden: item.bijzonderheden,
     binding: item.binding,
     groottonnage: item.groottonnage,

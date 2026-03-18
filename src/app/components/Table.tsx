@@ -89,6 +89,8 @@ export interface TextColumn extends BaseColumn {
   avatarInitialsKey?: string;
   /** Text color class override (e.g. for relation-style blue links) */
   textColor?: string;
+  /** Row key that holds a click handler for this cell (e.g. navigate to relation) */
+  onClickKey?: string;
 }
 
 export interface RatingColumn extends BaseColumn {
@@ -279,6 +281,7 @@ function CellText({ row, col }: { row: RowData; col: TextColumn }) {
   const subtext = col.subtextKey ? row[col.subtextKey] : undefined;
   const alignCls = col.align === "right" ? "text-right" : "text-left";
   const fontCls = "font-sans font-normal";
+  const onCellClick = col.onClickKey ? row[col.onClickKey] as (() => void) | undefined : undefined;
 
   const icon = col.iconKey ? row[col.iconKey] : undefined;
   const featuredIcon = col.featuredIconKey ? row[col.featuredIconKey] : undefined;
@@ -328,9 +331,19 @@ function CellText({ row, col }: { row: RowData; col: TextColumn }) {
         {hasText && (
           <div className={`min-w-0 ${alignCls}`}>
             {text != null && String(text) !== "" && (
-              <p className={`${fontCls} leading-[20px] ${textColor} text-[14px] truncate`}>
-                {String(text)}
-              </p>
+              onCellClick ? (
+                <button
+                  type="button"
+                  className={`${fontCls} leading-[20px] ${textColor} text-[14px] truncate text-left hover:underline cursor-pointer`}
+                  onClick={(e) => { e.stopPropagation(); onCellClick(); }}
+                >
+                  {String(text)}
+                </button>
+              ) : (
+                <p className={`${fontCls} leading-[20px] ${textColor} text-[14px] truncate`}>
+                  {String(text)}
+                </p>
+              )
             )}
             {subtext != null && String(subtext) !== "" && (
               <p className="font-sans font-normal leading-[20px] text-rdj-text-secondary text-[14px] truncate">
@@ -344,13 +357,25 @@ function CellText({ row, col }: { row: RowData; col: TextColumn }) {
   }
 
   // No leading visual — plain text layout
+  const textEl = text != null && String(text) !== "" ? (
+    onCellClick ? (
+      <button
+        type="button"
+        className={`${fontCls} leading-[20px] ${textColor} text-[14px] truncate text-left hover:underline cursor-pointer`}
+        onClick={(e) => { e.stopPropagation(); onCellClick(); }}
+      >
+        {String(text)}
+      </button>
+    ) : (
+      <p className={`${fontCls} leading-[20px] ${textColor} text-[14px] truncate`}>
+        {String(text)}
+      </p>
+    )
+  ) : null;
+
   return (
     <div className={alignCls}>
-      {text != null && String(text) !== "" && (
-        <p className={`${fontCls} leading-[20px] ${textColor} text-[14px] truncate`}>
-          {String(text)}
-        </p>
-      )}
+      {textEl}
       {subtext != null && String(subtext) !== "" && (
         <p className="font-sans font-normal leading-[20px] text-rdj-text-secondary text-[14px] truncate">
           {String(subtext)}

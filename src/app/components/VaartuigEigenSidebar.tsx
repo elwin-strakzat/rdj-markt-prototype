@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import DetailsSidebar, { DetailsSidebarSection } from "./DetailsSidebar";
 import DetailRow from "./DetailRow";
 import { useVaartuigEigenDetail } from "../data/useDetailData";
@@ -21,6 +22,7 @@ interface VaartuigEigenSidebarProps {
 }
 
 export default function VaartuigEigenSidebar({ id, onEdit }: VaartuigEigenSidebarProps) {
+  const navigate = useNavigate();
   const { data, loading, error } = useVaartuigEigenDetail(id);
   const [activeTab, setActiveTab] = useState<string>("details");
 
@@ -63,7 +65,7 @@ export default function VaartuigEigenSidebar({ id, onEdit }: VaartuigEigenSideba
         <DetailRow label="Diepgang" value={data.diepgang} editable onEdit={() => onEdit?.("diepgang")} />
         <DetailRow label="Kruiphoogte" value={data.kruiphoogte} editable onEdit={() => onEdit?.("kruiphoogte")} />
         <DetailRow label="Bijzonderheden" type="badges" badges={data.bijzonderheden} editable onEdit={() => onEdit?.("bijzonderheden")} />
-        <DetailRow label="Relatie" type="linked" value={data.relatie} />
+        <DetailRow label="Relatie" type="linked" value={data.relatie} onClick={() => navigate(`/crm/relatie/${data.relatieId}`)} />
         <DetailRow label="Contactpersoon" value={data.contactpersoon} />
       </DetailsSidebarSection>
 

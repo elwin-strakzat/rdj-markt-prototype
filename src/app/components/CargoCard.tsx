@@ -3,6 +3,7 @@ import { Ship, Warehouse } from "lucide-react";
 import { useNavigate } from "react-router";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
 import { Cargo } from "../data/mock-data";
+import { mockRelaties } from "../data/mock-relatie-data";
 
 interface CargoCardProps {
   cargo: Cargo;
@@ -40,7 +41,22 @@ export default function CargoCard({ cargo }: CargoCardProps) {
               </p>
             </div>
             <p className="font-sans font-normal leading-[18px] text-rdj-text-secondary text-[12px] mt-[2px]">
-              {cargo.company && <>{cargo.company} · </>}{cargo.code}
+              {cargo.company && (
+                <>
+                  <button
+                    type="button"
+                    className="text-rdj-text-brand hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rel = mockRelaties.find(r => r.naam === cargo.company);
+                      if (rel) navigate(`/crm/relatie/${rel.id}`);
+                    }}
+                  >
+                    {cargo.company}
+                  </button>
+                  {" · "}
+                </>
+              )}{cargo.code}
             </p>
           </div>
           <div className="relative rounded-[9999px] shrink-0 size-[28px]">
