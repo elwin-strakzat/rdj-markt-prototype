@@ -12,9 +12,10 @@ import Pagination from "../components/Pagination";
 import Table from "../components/Table";
 import type { Column } from "../components/Table";
 import svgPaths from "../../imports/svg-5yigdc067t";
-import FloatingActionBar from "../components/FloatingActionBar";
-import { useInboxLadingen, updateLadingMarktPriority, updateLadingMarktStatus, deleteLadingMarkt } from "../data/useMarktData";
+import { useInboxLadingen, updateLadingMarktPriority } from "../data/useMarktData";
 import * as apiClient from "../data/api";
+
+type InboxSubView = 'te-beoordelen' | 'interessant' | 'archief';
 
 interface InboxItem {
   id: string;
@@ -28,12 +29,16 @@ interface InboxItem {
   source: string;
   sourceDate: string;
   matches: number;
+  /** Best match type: 'eigen' = match with own item, 'interessant' = match with prio>=3, 'none' = no qualifying match */
+  matchType: 'eigen' | 'interessant' | 'none';
+  onderhandelingen: number;
   owner: string;
   priority: number;
   selected?: boolean;
 }
 
 const mockInboxData: InboxItem[] = [
+  // Te beoordelen (priority 0)
   {
     id: '1',
     title: 'Af te stemmen ton Houtpellets (0571)',
@@ -46,9 +51,97 @@ const mockInboxData: InboxItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 4,
+    matchType: 'interessant',
+    onderhandelingen: 0,
     owner: '',
     priority: 0,
   },
+  {
+    id: '6',
+    title: '2.500 ton Graan (0412)',
+    relation: 'Limber Benelux N.V.',
+    relationLink: 'K. van Hoorn',
+    loadLocation: 'Antwerpen Kanaaldok',
+    loadDate: 'Ma 19 Jan',
+    unloadLocation: 'Krefeld Rheinhafen',
+    unloadDate: 'Wo 21 Jan',
+    source: 'Automatische feed',
+    sourceDate: 'Vr 6 Feb 09:15',
+    matches: 3,
+    matchType: 'none',
+    onderhandelingen: 0,
+    owner: '',
+    priority: 0,
+  },
+  {
+    id: '7',
+    title: '1.800 ton Koolzaad (0298)',
+    relation: 'Cargo Solutions Ltd.',
+    relationLink: 'Marie Thomas',
+    loadLocation: 'Gent Zeehaven',
+    loadDate: 'Di 20 Jan',
+    unloadLocation: 'Mannheim Industriehafen',
+    unloadDate: 'Za 24 Jan',
+    source: 'Pager de Jong',
+    sourceDate: 'Vr 6 Feb 11:30',
+    matches: 5,
+    matchType: 'eigen',
+    onderhandelingen: 1,
+    owner: '',
+    priority: 0,
+  },
+  {
+    id: '8',
+    title: '4.000 ton Steenkool (0633)',
+    relation: 'Eco Transport GmbH',
+    relationLink: 'Anna Müller',
+    loadLocation: 'Amsterdam Westhaven',
+    loadDate: 'Wo 21 Jan',
+    unloadLocation: 'Duisburg Ruhrort',
+    unloadDate: 'Vr 23 Jan',
+    source: 'Automatische feed',
+    sourceDate: 'Za 7 Feb 08:00',
+    matches: 6,
+    matchType: 'eigen',
+    onderhandelingen: 2,
+    owner: '',
+    priority: 0,
+  },
+  {
+    id: '9',
+    title: '900 ton Sojameel (0187)',
+    relation: 'Global Shipping Inc.',
+    relationLink: 'Raj Patel',
+    loadLocation: 'Terneuzen Kanaalzone',
+    loadDate: 'Do 22 Jan',
+    unloadLocation: 'Basel Rheinhafen',
+    unloadDate: 'Di 27 Jan',
+    source: 'Automatische feed',
+    sourceDate: 'Za 7 Feb 14:20',
+    matches: 2,
+    matchType: 'none',
+    onderhandelingen: 0,
+    owner: '',
+    priority: 0,
+  },
+  {
+    id: '10',
+    title: '3.200 ton Ijzererts (0744)',
+    relation: 'Trans Logistics Group',
+    relationLink: '',
+    loadLocation: 'IJmuiden Zeehaven',
+    loadDate: 'Af te stemmen',
+    unloadLocation: 'Af te stemmen',
+    unloadDate: '',
+    source: 'Automatische feed',
+    sourceDate: 'Ma 9 Feb 10:00',
+    matches: 1,
+    matchType: 'none',
+    onderhandelingen: 0,
+    owner: '',
+    priority: 0,
+  },
+  // Interessant (priority >= 3)
   {
     id: '2',
     title: '1.000 - 3.500 ton Houtpellets (0571)',
@@ -61,8 +154,10 @@ const mockInboxData: InboxItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 7,
+    matchType: 'eigen',
+    onderhandelingen: 3,
     owner: '',
-    priority: 0,
+    priority: 4,
   },
   {
     id: '3',
@@ -76,9 +171,46 @@ const mockInboxData: InboxItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 13:24',
     matches: 7,
+    matchType: 'interessant',
+    onderhandelingen: 2,
     owner: 'avatar1',
-    priority: 0,
+    priority: 3,
   },
+  {
+    id: '11',
+    title: '2.000 ton Mais (0355)',
+    relation: 'Markel Freight B.V.',
+    relationLink: 'H.Q. Duivenvoorde',
+    loadLocation: 'Rotterdam Botlek',
+    loadDate: 'Ma 19 Jan',
+    unloadLocation: 'Strasbourg Port du Rhin',
+    unloadDate: 'Do 22 Jan',
+    source: 'Pager de Jong',
+    sourceDate: 'Do 5 Feb 16:00',
+    matches: 9,
+    matchType: 'eigen',
+    onderhandelingen: 4,
+    owner: 'avatar1',
+    priority: 5,
+  },
+  {
+    id: '12',
+    title: '1.500 ton Kunstmest (0499)',
+    relation: 'Andermans B.V.',
+    relationLink: 'Cees Andoormans',
+    loadLocation: 'Moerdijk Industriehaven',
+    loadDate: 'Di 20 Jan',
+    unloadLocation: 'Keulen Niehl',
+    unloadDate: 'Do 22 Jan',
+    source: 'Automatische feed',
+    sourceDate: 'Vr 6 Feb 07:30',
+    matches: 4,
+    matchType: 'interessant',
+    onderhandelingen: 1,
+    owner: 'avatar2',
+    priority: 3,
+  },
+  // Archief (priority 1-2)
   {
     id: '4',
     title: '3.000 ton Houtpellets (0571)',
@@ -91,8 +223,10 @@ const mockInboxData: InboxItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 7,
+    matchType: 'eigen',
+    onderhandelingen: 2,
     owner: '',
-    priority: 0,
+    priority: 2,
   },
   {
     id: '5',
@@ -106,17 +240,56 @@ const mockInboxData: InboxItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 8,
+    matchType: 'interessant',
+    onderhandelingen: 3,
     owner: 'avatar2',
     priority: 1,
+  },
+  {
+    id: '13',
+    title: '800 ton Zand (0122)',
+    relation: 'Buiten Onszelf N.V.',
+    relationLink: 'Lisa Aelbrechtse',
+    loadLocation: 'Dordrecht Zeehaven',
+    loadDate: 'Wo 14 Jan',
+    unloadLocation: 'Utrecht Lage Weide',
+    unloadDate: 'Do 15 Jan',
+    source: 'Automatische feed',
+    sourceDate: 'Di 3 Feb 15:00',
+    matches: 1,
+    matchType: 'none',
+    onderhandelingen: 0,
+    owner: '',
+    priority: 1,
+  },
+  {
+    id: '14',
+    title: '2.200 ton Grind (0266)',
+    relation: 'Eco Transport GmbH',
+    relationLink: 'Anna Müller',
+    loadLocation: 'Lobith Rijnhaven',
+    loadDate: 'Do 15 Jan',
+    unloadLocation: 'Nijmegen Waal',
+    unloadDate: 'Vr 16 Jan',
+    source: 'Pager de Jong',
+    sourceDate: 'Wo 4 Feb 09:45',
+    matches: 3,
+    matchType: 'none',
+    onderhandelingen: 1,
+    owner: '',
+    priority: 2,
   },
 ];
 
 export default function Inbox() {
   const navigate = useNavigate();
   const { openDetail, activeDetail } = useDetailPanel();
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const { data: apiItems, loading, error, refetch } = useInboxLadingen();
   const [localItems, setLocalItems] = useState<InboxItem[] | null>(null);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [itemType, setItemType] = useState<'lading' | 'vaartuig'>('lading');
+  const [subView, setSubView] = useState<InboxSubView>('te-beoordelen');
   const inboxItems = localItems ?? apiItems.map(a => ({
     id: a.id,
     title: a.title,
@@ -129,12 +302,16 @@ export default function Inbox() {
     source: a.source,
     sourceDate: a.sourceDate,
     matches: a.matches,
+    matchType: a.matchType,
+    onderhandelingen: a.onderhandelingen,
     owner: a.owner,
     priority: a.priority,
   }));
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [itemType, setItemType] = useState<'lading' | 'vaartuig'>('lading');
+  const filteredItems = inboxItems.filter(item => {
+    if (subView === 'te-beoordelen') return item.priority === 0;
+    if (subView === 'interessant') return item.priority >= 3;
+    return item.priority >= 1 && item.priority <= 2; // archief
+  });
   const [searchParams] = useSearchParams();
   const viewMode = (searchParams.get('view') === 'map' ? 'map' : 'list') as 'list' | 'map';
   const setViewMode = (val: 'list' | 'map') => {
@@ -143,48 +320,7 @@ export default function Inbox() {
   const [mapMode, setMapMode] = useState<'laden' | 'lossen'>('laden');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
-  const totalItems = inboxItems.length;
-
-  const handleToggleSelect = (id: string) => {
-    const newSelected = [...selectedItems];
-    if (newSelected.includes(id)) {
-      const index = newSelected.indexOf(id);
-      newSelected.splice(index, 1);
-    } else {
-      newSelected.push(id);
-    }
-    setSelectedItems(newSelected);
-  };
-
-  const handleSelectAll = () => {
-    if (selectedItems.length === inboxItems.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(inboxItems.map(item => item.id));
-    }
-  };
-
-  const handleArchive = (ids: string[]) => {
-    setLocalItems(inboxItems.filter(item => !ids.includes(item.id)));
-    // Also delete from server
-    ids.forEach(id => deleteLadingMarkt(id).catch(console.error));
-    setSelectedItems([]);
-    toast.success(ids.length === 1 ? 'Item gearchiveerd' : `${ids.length} items gearchiveerd`, {
-      description: 'De items zijn verwijderd uit de inbox.',
-      duration: 3000,
-    });
-  };
-
-  const handleMoveToPipeline = (ids: string[]) => {
-    setLocalItems(inboxItems.filter(item => !ids.includes(item.id)));
-    // Update status on server
-    ids.forEach(id => updateLadingMarktStatus(id, 'pijplijn').catch(console.error));
-    setSelectedItems([]);
-    toast.success(ids.length === 1 ? 'Item naar pijplijn verplaatst' : `${ids.length} items naar pijplijn verplaatst`, {
-      description: 'De items zijn nu zichtbaar in het Pijplijn scherm.',
-      duration: 3000,
-    });
-  };
+  const totalItems = filteredItems.length;
 
   const handleAddItem = async (data: any) => {
     try {
@@ -229,54 +365,40 @@ export default function Inbox() {
     { key: 'relation', header: 'Relatie', type: 'text', width: 'w-[180px]', textColor: 'text-rdj-text-brand', subtextKey: 'relationLink' },
     { key: 'loadLocation', header: 'Laden', type: 'text', width: 'w-[180px]', editable: true },
     { key: 'unloadLocation', header: 'Lossen', type: 'text', width: 'w-[180px]', editable: true },
-    { key: 'matchesBadges', header: 'Matches', type: 'badges', width: 'w-[120px]' },
+    {
+      key: 'matches', header: 'Matches', type: 'custom', width: 'w-[120px]',
+      render: (row) => {
+        const count = row.matches as number;
+        const matchType = row.matchType as string;
+        if (!count) return null;
+        const bg = matchType === 'eigen'
+          ? 'bg-[#eff8ff] text-[#175cd3] border-[#b2ddff]'
+          : matchType === 'interessant'
+          ? 'bg-[#fffaeb] text-[#b54708] border-[#fedf89]'
+          : 'bg-white text-[#344054] border-[#d0d5dd]';
+        return (
+          <span className={`inline-flex items-center gap-[4px] rounded-full border px-[10px] py-[2px] font-sans font-bold text-[13px] leading-[20px] ${bg}`}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.25 6.417h3.5M5.25 8.75h2.333M9.333 2.917H11.2c.653 0 .98 0 1.232.127.222.112.403.293.515.515.127.252.127.578.127 1.232v5.834c0 .653 0 .98-.127 1.232a1.167 1.167 0 0 1-.515.515c-.252.128-.579.128-1.232.128H2.8c-.653 0-.98 0-1.232-.128a1.167 1.167 0 0 1-.515-.515C.927 11.605.927 11.278.927 10.625V4.79c0-.654 0-.98.127-1.232.112-.222.293-.403.515-.515.252-.127.579-.127 1.232-.127h1.866m0-1.75h4.666c.327 0 .49 0 .616.064.11.056.201.146.258.258.063.126.063.29.063.616v.812c0 .327 0 .49-.063.616a.583.583 0 0 1-.258.258c-.126.063-.29.063-.616.063H4.667c-.327 0-.49 0-.616-.063a.583.583 0 0 1-.258-.258c-.063-.126-.063-.29-.063-.616v-.812c0-.327 0-.49.063-.616a.583.583 0 0 1 .258-.258c.126-.064.29-.064.616-.064Z" stroke="currentColor" strokeWidth="1.17" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            {count}
+          </span>
+        );
+      },
+    },
+    { key: 'onderhandelingen', header: 'Onderhandelingen', type: 'text', width: 'w-[140px]', align: 'right' },
     { key: 'ownerLabel', header: 'Eigenaar', type: 'text', width: 'w-[80px]', avatarSrcKey: 'ownerAvatarSrc', avatarInitialsKey: 'ownerInitials', editable: true },
     { key: 'priority', header: 'Prioriteit', type: 'rating', width: 'w-[140px]', onRate: handleRate, editable: true },
-    {
-      key: 'actions', header: '', type: 'custom', width: 'w-[80px]',
-      render: (row) => hoveredRow === row.id ? (
-        <div className="flex items-center justify-center gap-[4px]">
-          <button
-            onClick={(e) => { e.stopPropagation(); handleArchive([row.id]); }}
-            className="content-stretch flex items-center justify-center overflow-clip p-[6px] relative rounded-[6px] shrink-0 hover:bg-gray-100"
-          >
-            <div className="overflow-clip relative shrink-0 size-[16px]">
-              <div className="absolute inset-1/4">
-                <div className="absolute inset-[-10.42%]">
-                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 9.66667 9.66667">
-                    <path d={svgPaths.p448fa80} stroke="#344054" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); handleMoveToPipeline([row.id]); }}
-            className="content-stretch flex items-center justify-center overflow-clip p-[6px] relative rounded-[6px] shrink-0 hover:bg-gray-100"
-          >
-            <div className="overflow-clip relative shrink-0 size-[16px]">
-              <div className="absolute bottom-[29.17%] left-[16.67%] right-[16.67%] top-1/4">
-                <div className="absolute inset-[-11.34%_-7.79%]">
-                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 12.3292 8.99583">
-                    <path d={svgPaths.p1c26b00} stroke="#145990" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6625" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      ) : null,
-    },
   ];
 
-  const tableData = inboxItems.map(item => ({
+  const tableData = filteredItems.map(item => ({
     id: item.id,
     title: item.title,
     relation: item.relation,
     relationLink: item.relationLink,
     loadLocation: item.loadLocation,
     unloadLocation: item.unloadLocation,
-    matchesBadges: [`${item.matches}`],
+    matches: item.matches,
+    matchType: item.matchType,
+    onderhandelingen: item.onderhandelingen,
     ownerLabel: '',
     ownerInitials: item.owner ? 'PJ' : undefined,
     priority: item.priority,
@@ -325,7 +447,15 @@ export default function Inbox() {
             ]}
             filtersLeft={
               <>
-                <FilterDropdown label="Te beoordelen" />
+                <SegmentedButtonGroup
+                  items={[
+                    { label: 'Te beoordelen', value: 'te-beoordelen', count: inboxItems.filter(i => i.priority === 0).length },
+                    { label: 'Interessant', value: 'interessant', count: inboxItems.filter(i => i.priority >= 3).length },
+                    { label: 'Archief', value: 'archief', count: inboxItems.filter(i => i.priority >= 1 && i.priority <= 2).length },
+                  ]}
+                  value={subView}
+                  onChange={(val) => setSubView(val as InboxSubView)}
+                />
                 <FilterDropdown label="Relatie" />
                 <FilterDropdown
                   label="Start laden: 13 Jan 2026 en eerder"
@@ -371,9 +501,7 @@ export default function Inbox() {
           {/* Content: Table or Map */}
           {viewMode === 'map' ? (
             <div className="flex-1 px-[24px] pt-[16px] pb-[24px] min-h-0">
-              <InboxMapView 
-                onArchive={handleArchive}
-                onMoveToPipeline={handleMoveToPipeline}
+              <InboxMapView
                 mode={mapMode}
               />
             </div>
@@ -391,10 +519,6 @@ export default function Inbox() {
               data={tableData}
               onRowClick={(row) => openDetail('lading', row.id)}
               activeRowId={activeDetail?.type === 'lading' ? activeDetail.id : null}
-              selectable
-              selectedIds={selectedItems}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleToggleSelect}
               hoveredRowId={hoveredRow}
               onRowHover={setHoveredRow}
             />
@@ -411,17 +535,6 @@ export default function Inbox() {
         </div>
       </div>
 
-      {/* Multi-select Action Bar */}
-      {selectedItems.length > 0 && (
-        <FloatingActionBar
-          selectedCount={selectedItems.length}
-          totalCount={totalItems}
-          itemLabel="ladingen"
-          onSelectAll={handleSelectAll}
-          onArchive={() => handleArchive(selectedItems)}
-          onMoveToPipeline={() => handleMoveToPipeline(selectedItems)}
-        />
-      )}
     </>
   );
 }

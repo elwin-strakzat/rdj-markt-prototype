@@ -557,7 +557,7 @@ export function usePijplijnLadingSummary(id: string | undefined, typeHint?: "eig
               const soortLabel = subsoort ? `${soort?.naam || ""} (${subsoort.naam})` : soort?.naam || "";
               resolved = {
                 type: "eigen",
-                title: ex ? `${ex.type === "Warehouse" ? ex.naam : `m/v ${ex.naam}`} - ${relatie?.naam || ""}` : `${subpartij?.naam || ""} - ${relatie?.naam || ""}`,
+                title: ex ? `${ex.type === "opslag" ? ex.naam : `m/v ${ex.naam}`} - ${relatie?.naam || ""}` : `${subpartij?.naam || ""} - ${relatie?.naam || ""}`,
                 subtitle: `${formatTonnage(item.tonnage)} ton ${soortLabel}`,
                 status: "Is in de markt",
                 statusColor: "#17B26A",
@@ -857,7 +857,7 @@ export function useBevrachtingLadingSummary(id: string | undefined) {
           const loshaven = subpartij ? maps.havens.get(subpartij.loshavenId) : null;
 
           const soortLabel = subsoort ? `${soort?.naam || ""} (${subsoort.naam})` : soort?.naam || "";
-          const title = ex ? (ex.type === "Warehouse" ? ex.naam : `m/v ${ex.naam}`) : subpartij?.naam || id || "—";
+          const title = ex ? (ex.type === "opslag" ? ex.naam : `m/v ${ex.naam}`) : subpartij?.naam || id || "—";
           const status = (item as any).status || "intake";
 
           resolved = {

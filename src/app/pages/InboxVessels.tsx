@@ -1,5 +1,4 @@
 import svgPaths from "../../imports/svg-gjl6m1r792";
-import FloatingActionBar from "../components/FloatingActionBar";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useDetailPanel } from "../components/DetailPanelContext";
@@ -12,8 +11,10 @@ import FilterDropdown from "../components/FilterDropdown";
 import Pagination from "../components/Pagination";
 import Table from "../components/Table";
 import type { Column } from "../components/Table";
-import { useInboxVaartuigen, updateVaartuigMarktPriority, deleteVaartuigMarkt } from "../data/useMarktData";
+import { useInboxVaartuigen, updateVaartuigMarktPriority } from "../data/useMarktData";
 import * as apiClient from "../data/api";
+
+type InboxSubView = 'te-beoordelen' | 'interessant' | 'archief';
 
 interface VesselItem {
   id: string;
@@ -30,6 +31,8 @@ interface VesselItem {
   source: string;
   sourceDate: string;
   matches: number;
+  matchType: 'eigen' | 'interessant' | 'none';
+  onderhandelingen: number;
   owner: string;
   priority: number;
   selected?: boolean;
@@ -51,6 +54,8 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 4,
+    matchType: 'interessant',
+    onderhandelingen: 0,
     owner: '',
     priority: 0,
   },
@@ -69,8 +74,10 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 7,
+    matchType: 'eigen',
+    onderhandelingen: 3,
     owner: 'avatar1',
-    priority: 1,
+    priority: 4,
   },
   {
     id: '3',
@@ -87,8 +94,10 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 7,
+    matchType: 'eigen',
+    onderhandelingen: 2,
     owner: '',
-    priority: 0,
+    priority: 3,
   },
   {
     id: '4',
@@ -105,8 +114,10 @@ const mockVesselData: VesselItem[] = [
     source: 'Pager de Jong',
     sourceDate: 'Do 3 Feb 12:44',
     matches: 8,
+    matchType: 'interessant',
+    onderhandelingen: 2,
     owner: 'avatar2',
-    priority: 0,
+    priority: 2,
   },
   {
     id: '5',
@@ -123,6 +134,8 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 9,
+    matchType: 'eigen',
+    onderhandelingen: 2,
     owner: '',
     priority: 0,
   },
@@ -141,6 +154,8 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 4,
+    matchType: 'none',
+    onderhandelingen: 0,
     owner: '',
     priority: 0,
   },
@@ -159,8 +174,10 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 2,
+    matchType: 'none',
+    onderhandelingen: 0,
     owner: '',
-    priority: 0,
+    priority: 1,
   },
   {
     id: '8',
@@ -177,6 +194,8 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 10,
+    matchType: 'eigen',
+    onderhandelingen: 1,
     owner: '',
     priority: 0,
   },
@@ -195,8 +214,92 @@ const mockVesselData: VesselItem[] = [
     source: 'Automatische feed',
     sourceDate: 'Do 5 Feb 12:44',
     matches: 1,
+    matchType: 'none',
+    onderhandelingen: 0,
     owner: '',
     priority: 0,
+  },
+  // Interessant (priority >= 3)
+  {
+    id: '10',
+    name: 'Beatrix',
+    type: 'Motorschip',
+    relation: 'Van Dijk Shipping B.V.',
+    relationContact: 'P. van Dijk',
+    location: 'Dordrecht Zeehaven',
+    locationDetail: '',
+    availableFrom: '25 Jan, 2025 08:00',
+    cargoTypes: ['KS', 'LR', 'GMP', 'LP'],
+    tonnage: '3.800 mt',
+    capacity: '4.500 m³',
+    source: 'Pager de Jong',
+    sourceDate: 'Ma 9 Feb 10:30',
+    matches: 6,
+    matchType: 'eigen',
+    onderhandelingen: 4,
+    owner: 'avatar1',
+    priority: 5,
+  },
+  {
+    id: '11',
+    name: 'Cornelia',
+    type: 'Duwbak',
+    relation: 'Rijnvaart Transport N.V.',
+    relationContact: 'Lisa Ashbourne',
+    location: 'Rotterdam Botlek',
+    locationDetail: 'Kade 7',
+    availableFrom: '22 Jan, 2025 14:00',
+    cargoTypes: ['KS', 'GMP'],
+    tonnage: '4.200 mt',
+    capacity: '5.100 m³',
+    source: 'Automatische feed',
+    sourceDate: 'Za 8 Feb 16:00',
+    matches: 8,
+    matchType: 'interessant',
+    onderhandelingen: 1,
+    owner: '',
+    priority: 3,
+  },
+  // Archief (priority 1-2)
+  {
+    id: '12',
+    name: 'De Hoop',
+    type: 'Motorschip',
+    relation: 'Limber Benelux N.V.',
+    relationContact: 'K. van Hoorn',
+    location: 'Antwerpen Kanaaldok',
+    locationDetail: '',
+    availableFrom: '15 Jan, 2025',
+    cargoTypes: ['KS', 'LR'],
+    tonnage: '2.100 mt',
+    capacity: '2.800 m³',
+    source: 'Automatische feed',
+    sourceDate: 'Do 5 Feb 12:44',
+    matches: 2,
+    matchType: 'none',
+    onderhandelingen: 0,
+    owner: '',
+    priority: 2,
+  },
+  {
+    id: '13',
+    name: 'Eendracht',
+    type: 'Motorschip',
+    relation: 'Jansen Bevrachting B.V.',
+    relationContact: 'P. Janssen',
+    location: 'Nijmegen Waal',
+    locationDetail: '',
+    availableFrom: '12 Jan, 2025 06:00',
+    cargoTypes: ['KS', 'LR', 'GMP'],
+    tonnage: '3.100 mt',
+    capacity: '3.900 m³',
+    source: 'Pager de Jong',
+    sourceDate: 'Wo 4 Feb 11:15',
+    matches: 3,
+    matchType: 'interessant',
+    onderhandelingen: 1,
+    owner: '',
+    priority: 1,
   },
 ];
 
@@ -220,11 +323,18 @@ export default function InboxVessels() {
     source: a.source,
     sourceDate: a.sourceDate,
     matches: a.matches,
+    matchType: a.matchType,
+    onderhandelingen: a.onderhandelingen,
     owner: a.owner,
     priority: a.priority,
   }));
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [subView, setSubView] = useState<InboxSubView>('te-beoordelen');
+  const filteredItems = vesselItems.filter(item => {
+    if (subView === 'te-beoordelen') return item.priority === 0;
+    if (subView === 'interessant') return item.priority >= 3;
+    return item.priority >= 1 && item.priority <= 2; // archief
+  });
   const [searchParams] = useSearchParams();
   const viewMode = (searchParams.get('view') === 'map' ? 'map' : 'list') as 'list' | 'map';
   const setViewMode = (val: 'list' | 'map') => {
@@ -232,42 +342,7 @@ export default function InboxVessels() {
   };
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
-  const totalItems = vesselItems.length;
-
-  const handleSelectAll = () => {
-    if (selectedItems.length === vesselItems.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(vesselItems.map(item => item.id));
-    }
-  };
-
-  const handleSelectItem = (id: string) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter(itemId => itemId !== id));
-    } else {
-      setSelectedItems([...selectedItems, id]);
-    }
-  };
-
-  const handleArchive = (ids: string[]) => {
-    setLocalItems(vesselItems.filter(item => !ids.includes(item.id)));
-    ids.forEach(id => deleteVaartuigMarkt(id).catch(console.error));
-    setSelectedItems([]);
-    toast.success(`${ids.length} vaartuig${ids.length > 1 ? 'en' : ''} gearchiveerd`, {
-      description: `${ids.length > 1 ? 'De vaartuigen zijn' : 'Het vaartuig is'} verwijderd uit de inbox.`,
-      duration: 3000,
-    });
-  };
-
-  const handleMoveToPipeline = (ids: string[]) => {
-    setLocalItems(vesselItems.filter(item => !ids.includes(item.id)));
-    setSelectedItems([]);
-    toast.success(`${ids.length} vaartuig${ids.length > 1 ? 'en' : ''} naar pijplijn verplaatst`, {
-      description: `${ids.length > 1 ? 'De vaartuigen zijn' : 'Het vaartuig is'} nu zichtbaar in het Pijplijn scherm.`,
-      duration: 3000,
-    });
-  };
+  const totalItems = filteredItems.length;
 
   const handleRate = (rowId: string, value: number) => {
     setLocalItems(vesselItems.map(i => i.id === rowId ? { ...i, priority: value } : i));
@@ -283,47 +358,31 @@ export default function InboxVessels() {
     { key: 'tonnage', header: 'Groottonnage', type: 'text', width: 'w-[100px]', align: 'right', editable: true },
     { key: 'capacity', header: 'Inhoud', type: 'text', width: 'w-[90px]', align: 'right', editable: true },
     { key: 'source', header: 'Bron', type: 'text', width: 'w-[140px]', subtextKey: 'sourceDate', featuredIconKey: 'sourceIcon', featuredIconVariantKey: 'sourceIconVariant', featuredIconDefaultVariant: 'grey' as const, avatarSrcKey: 'sourceAvatarSrc' },
-    { key: 'matchesBadges', header: 'Matches', type: 'badges', width: 'w-[100px]' },
+    {
+      key: 'matches', header: 'Matches', type: 'custom', width: 'w-[100px]',
+      render: (row) => {
+        const count = row.matches as number;
+        const matchType = row.matchType as string;
+        if (!count) return null;
+        const bg = matchType === 'eigen'
+          ? 'bg-[#eff8ff] text-[#175cd3] border-[#b2ddff]'
+          : matchType === 'interessant'
+          ? 'bg-[#fffaeb] text-[#b54708] border-[#fedf89]'
+          : 'bg-white text-[#344054] border-[#d0d5dd]';
+        return (
+          <span className={`inline-flex items-center gap-[4px] rounded-full border px-[10px] py-[2px] font-sans font-bold text-[13px] leading-[20px] ${bg}`}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.25 6.417h3.5M5.25 8.75h2.333M9.333 2.917H11.2c.653 0 .98 0 1.232.127.222.112.403.293.515.515.127.252.127.578.127 1.232v5.834c0 .653 0 .98-.127 1.232a1.167 1.167 0 0 1-.515.515c-.252.128-.579.128-1.232.128H2.8c-.653 0-.98 0-1.232-.128a1.167 1.167 0 0 1-.515-.515C.927 11.605.927 11.278.927 10.625V4.79c0-.654 0-.98.127-1.232.112-.222.293-.403.515-.515.252-.127.579-.127 1.232-.127h1.866m0-1.75h4.666c.327 0 .49 0 .616.064.11.056.201.146.258.258.063.126.063.29.063.616v.812c0 .327 0 .49-.063.616a.583.583 0 0 1-.258.258c-.126.063-.29.063-.616.063H4.667c-.327 0-.49 0-.616-.063a.583.583 0 0 1-.258-.258c-.063-.126-.063-.29-.063-.616v-.812c0-.327 0-.49.063-.616a.583.583 0 0 1 .258-.258c.126-.064.29-.064.616-.064Z" stroke="currentColor" strokeWidth="1.17" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            {count}
+          </span>
+        );
+      },
+    },
+    { key: 'onderhandelingen', header: 'Onderhandelingen', type: 'text', width: 'w-[140px]', align: 'right' },
     { key: 'ownerLabel', header: 'Eigenaar', type: 'text', width: 'w-[80px]', avatarInitialsKey: 'ownerInitials', editable: true },
     { key: 'priority', header: 'Prioriteit', type: 'rating', width: 'w-[140px]', onRate: handleRate, editable: true },
-    {
-      key: 'actions', header: '', type: 'custom', width: 'w-[80px]',
-      render: (row) => hoveredRow === row.id ? (
-        <div className="flex items-center justify-center gap-[4px]">
-          <button
-            onClick={(e) => { e.stopPropagation(); handleArchive([row.id]); }}
-            className="content-stretch flex items-center justify-center overflow-clip p-[6px] relative rounded-[6px] shrink-0 hover:bg-gray-100"
-          >
-            <div className="overflow-clip relative shrink-0 size-[16px]">
-              <div className="absolute inset-1/4">
-                <div className="absolute inset-[-10.42%]">
-                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 9.66667 9.66667">
-                    <path d={svgPaths.p448fa80} stroke="#344054" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); handleMoveToPipeline([row.id]); }}
-            className="content-stretch flex items-center justify-center overflow-clip p-[6px] relative rounded-[6px] shrink-0 hover:bg-gray-100"
-          >
-            <div className="overflow-clip relative shrink-0 size-[16px]">
-              <div className="absolute bottom-[29.17%] left-[16.67%] right-[16.67%] top-1/4">
-                <div className="absolute inset-[-11.34%_-7.79%]">
-                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 12.3292 8.99583">
-                    <path d={svgPaths.p1c26b00} stroke="#145990" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6625" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      ) : null,
-    },
   ];
 
-  const tableData = vesselItems.map(item => {
+  const tableData = filteredItems.map(item => {
     // Split availableFrom into date and time parts
     const parts = item.availableFrom.match(/^(.+?)(\s+\d{1,2}:\d{2})?$/);
     const availableFromDate = parts ? parts[1] : item.availableFrom;
@@ -351,7 +410,9 @@ export default function InboxVessels() {
         </svg>
       ),
       sourceIconVariant: 'grey',
-      matchesBadges: [`${item.matches}`],
+      matches: item.matches,
+      matchType: item.matchType,
+      onderhandelingen: item.onderhandelingen,
       ownerLabel: '',
       ownerInitials: item.owner ? 'PJ' : undefined,
       priority: item.priority,
@@ -382,7 +443,15 @@ export default function InboxVessels() {
             ]}
             filtersLeft={
               <>
-                <FilterDropdown label="Te beoordelen" />
+                <SegmentedButtonGroup
+                  items={[
+                    { label: 'Te beoordelen', value: 'te-beoordelen', count: vesselItems.filter(i => i.priority === 0).length },
+                    { label: 'Interessant', value: 'interessant', count: vesselItems.filter(i => i.priority >= 3).length },
+                    { label: 'Archief', value: 'archief', count: vesselItems.filter(i => i.priority >= 1 && i.priority <= 2).length },
+                  ]}
+                  value={subView}
+                  onChange={(val) => setSubView(val as InboxSubView)}
+                />
                 <FilterDropdown label="Relatie" />
                 <button className="bg-white relative rounded-[6px] shrink-0"><div className="content-stretch flex gap-[4px] items-center justify-center overflow-clip px-[14px] py-[8px] relative rounded-[inherit]"><div className="overflow-clip relative shrink-0 size-[20px]"><div className="absolute inset-[8.33%]"><div className="absolute inset-[-5%]"><svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22 22"><path d={svgPaths.p2bfa7100} stroke="#344054" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg></div></div></div><p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#344054] text-[14px] whitespace-nowrap">Filter</p></div><div aria-hidden="true" className="absolute border border-[#d0d5dd] border-solid inset-0 pointer-events-none rounded-[6px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]" /></button>
               </>
@@ -405,10 +474,7 @@ export default function InboxVessels() {
           {/* Content: Map or Table */}
           {viewMode === 'map' ? (
             <div className="flex-1 px-[24px] pt-[16px] pb-[24px] min-h-0">
-              <VesselMapView
-                onArchive={handleArchive}
-                onMoveToPipeline={handleMoveToPipeline}
-              />
+              <VesselMapView />
             </div>
           ) : (
           <div className="">
@@ -425,10 +491,6 @@ export default function InboxVessels() {
               data={tableData}
               onRowClick={(row) => openDetail('vaartuig', row.id)}
               activeRowId={activeDetail?.type === 'vaartuig' ? activeDetail.id : null}
-              selectable
-              selectedIds={selectedItems}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleSelectItem}
               hoveredRowId={hoveredRow}
               onRowHover={setHoveredRow}
             />
@@ -444,14 +506,6 @@ export default function InboxVessels() {
           )}
         </div>
       </div>
-      <FloatingActionBar
-        selectedCount={selectedItems.length}
-        totalCount={totalItems}
-        itemLabel="vaartuigen"
-        onSelectAll={handleSelectAll}
-        onArchive={() => handleArchive(selectedItems)}
-        onMoveToPipeline={() => handleMoveToPipeline(selectedItems)}
-      />
     </>
   );
 }

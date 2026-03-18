@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import StarRating from "./StarRating";
 
 /**
  * DetailRow — a label + value row for detail sidebars.
@@ -10,7 +11,7 @@ import { type ReactNode } from "react";
  *   user     — avatar (image or initials) + text
  */
 
-export type DetailRowType = "default" | "linked" | "badges" | "user";
+export type DetailRowType = "default" | "linked" | "badges" | "user" | "rating";
 
 export interface DetailRowProps {
   /** Left-side label */
@@ -45,6 +46,12 @@ export interface DetailRowProps {
 
   /** Callback when the editable value area is clicked */
   onEdit?: () => void;
+
+  /** Rating value (type = rating) */
+  rating?: number;
+
+  /** Rating change handler (type = rating) */
+  onRate?: (value: number) => void;
 }
 
 export default function DetailRow({
@@ -59,6 +66,8 @@ export default function DetailRow({
   labelWidth = "w-[144px]",
   editable = false,
   onEdit,
+  rating,
+  onRate,
 }: DetailRowProps) {
   const valueContent = (
     <>
@@ -73,6 +82,11 @@ export default function DetailRow({
           avatarSrc={avatarSrc}
           avatarInitials={avatarInitials}
         />
+      )}
+      {type === "rating" && (
+        <div className="px-[12px] py-[6px]">
+          <StarRating value={rating ?? 0} onChange={onRate} />
+        </div>
       )}
     </>
   );

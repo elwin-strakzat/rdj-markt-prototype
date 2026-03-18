@@ -1,6 +1,6 @@
 import type { VaartuigMarkt } from "../api";
 
-export const vaartuigenMarkt: (VaartuigMarkt & { status?: string; binding?: string })[] = [
+export const vaartuigenMarkt: (VaartuigMarkt & { status?: string; binding?: string; matches?: number; matchType?: 'eigen' | 'interessant' | 'none'; onderhandelingen?: number })[] = [
   {
     id: "vm-001",
     naam: "Emily",
@@ -21,6 +21,9 @@ export const vaartuigenMarkt: (VaartuigMarkt & { status?: string; binding?: stri
     relatieId: "rel-001",
     eigenaarId: "usr-001",
     prioriteit: 3,
+    matches: 7,
+    matchType: "eigen",
+    onderhandelingen: 3,
     status: "inbox",
   },
   {
@@ -43,6 +46,9 @@ export const vaartuigenMarkt: (VaartuigMarkt & { status?: string; binding?: stri
     relatieId: "rel-002",
     eigenaarId: "usr-002",
     prioriteit: 2,
+    matches: 4,
+    matchType: "interessant",
+    onderhandelingen: 1,
     status: "inbox",
   },
   {
@@ -65,6 +71,9 @@ export const vaartuigenMarkt: (VaartuigMarkt & { status?: string; binding?: stri
     relatieId: "rel-003",
     eigenaarId: null,
     prioriteit: 1,
+    matches: 2,
+    matchType: "none",
+    onderhandelingen: 0,
     status: "inbox",
   },
   {
@@ -87,6 +96,9 @@ export const vaartuigenMarkt: (VaartuigMarkt & { status?: string; binding?: stri
     relatieId: "rel-005",
     eigenaarId: "usr-002",
     prioriteit: 4,
+    matches: 9,
+    matchType: "eigen",
+    onderhandelingen: 2,
     status: "inbox",
   },
 ];

@@ -230,7 +230,7 @@ function CellLeadingText({
       )}
       {iconType && (
         <div className="shrink-0 flex items-center justify-center">
-          {iconType === "Warehouse" ? (
+          {iconType === "opslag" ? (
             <Warehouse className="size-[16px] text-rdj-text-tertiary" />
           ) : (
             <Ship className="size-[16px] text-rdj-text-tertiary" />

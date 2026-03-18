@@ -7,6 +7,8 @@ export interface SegmentedButtonItem {
   label?: string;
   /** Icon ReactNode (for icon variant) */
   icon?: ReactNode;
+  /** Optional count badge shown after label */
+  count?: number;
 }
 
 interface SegmentedButtonGroupProps {
@@ -40,7 +42,7 @@ export default function SegmentedButtonGroup({
               onClick={() => onChange(item.value)}
               className={`${
                 isActive ? "bg-rdj-bg-active" : "bg-rdj-bg-primary"
-              } content-stretch flex items-center justify-center min-h-[40px] ${
+              } content-stretch flex items-center justify-center gap-[6px] min-h-[40px] ${
                 item.label ? "px-[16px]" : "px-[12px]"
               } py-[8px] relative shrink-0 cursor-pointer`}
               style={{ zIndex }}
@@ -75,6 +77,19 @@ export default function SegmentedButtonGroup({
                 >
                   {item.label}
                 </p>
+              )}
+
+              {/* Count badge */}
+              {item.count != null && (
+                <span
+                  className={`font-sans font-medium text-[12px] leading-[16px] rounded-full min-w-[20px] px-[6px] py-[1px] text-center ${
+                    isActive
+                      ? "bg-rdj-text-brand text-white"
+                      : "bg-[#f2f4f7] text-[#344054]"
+                  }`}
+                >
+                  {item.count}
+                </span>
               )}
             </button>
           );

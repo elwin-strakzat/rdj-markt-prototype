@@ -96,7 +96,7 @@ export const mockCargos: Cargo[] = [
   {
     id: 'CRG001',
     title: 'm/v Abis Dover',
-    exType: 'Zeeboot',
+    exType: 'zeeboot',
     company: 'Janlow B.V.',
     code: 'JA0092-01',
     status: 'intake',
@@ -113,7 +113,7 @@ export const mockCargos: Cargo[] = [
   {
     id: 'CRG002',
     title: 'm/v Maran Future',
-    exType: 'Zeeboot',
+    exType: 'zeeboot',
     company: 'Provaart Logistics BV',
     code: 'PRO029-01 ra',
     status: 'intake',
@@ -127,7 +127,7 @@ export const mockCargos: Cargo[] = [
   {
     id: 'CRG003',
     title: 'Loods Rotterdam Europoort',
-    exType: 'Warehouse',
+    exType: 'opslag',
     company: 'Limber Benelux N.V.',
     code: 'UN762-02',
     status: 'intake',
@@ -141,7 +141,7 @@ export const mockCargos: Cargo[] = [
   {
     id: 'CRG164-01',
     title: 'm/v Maran Future',
-    exType: 'Zeeboot',
+    exType: 'zeeboot',
     company: 'Provaart Logistics BV',
     code: 'PRO029-01 ra',
     status: 'werklijst',
@@ -170,7 +170,7 @@ export const mockCargos: Cargo[] = [
   {
     id: 'CRG005',
     title: 'Opslagloods Mannheim',
-    exType: 'Warehouse',
+    exType: 'opslag',
     company: 'Cargill N.V.',
     code: 'CRG164-01',
     status: 'markt',
@@ -185,7 +185,7 @@ export const mockCargos: Cargo[] = [
   {
     id: 'CRG006',
     title: 'm/v Merganser',
-    exType: 'Zeeboot',
+    exType: 'zeeboot',
     company: 'Agro Delta Groep',
     code: 'ADG-0045',
     status: 'markt',

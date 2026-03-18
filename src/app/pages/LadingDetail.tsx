@@ -221,7 +221,7 @@ export default function LadingDetail() {
                   <PageHeader
                     title={summaryLoading ? "Laden..." : (summary?.title || "—")}
                     titleIcon={summary?.exType ? (
-                      summary.exType === "Warehouse" ? (
+                      summary.exType === "opslag" ? (
                         <Warehouse className="size-[24px] text-rdj-text-tertiary" />
                       ) : (
                         <Ship className="size-[24px] text-rdj-text-tertiary" />

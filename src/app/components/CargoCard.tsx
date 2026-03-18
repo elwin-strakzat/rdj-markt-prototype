@@ -30,7 +30,7 @@ export default function CargoCard({ cargo }: CargoCardProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-[4px]">
               {cargo.exType && (
-                cargo.exType === "Warehouse" ? (
+                cargo.exType === "opslag" ? (
                   <Warehouse className="shrink-0 size-[14px] text-rdj-text-tertiary" />
                 ) : (
                   <Ship className="shrink-0 size-[14px] text-rdj-text-tertiary" />
