@@ -9,9 +9,11 @@ import Pagination from "./Pagination";
 import Button from "./Button";
 import ActivityFeed from "./ActivityFeed";
 import NegotiationDialog from "./NegotiationDialog";
+import ConversationDialog from "./ConversationDialog";
 import { DetailsSidebarSection } from "./DetailsSidebar";
 import DetailRow from "./DetailRow";
 import { useBevrachtingVaartuigSummary, useVaartuigEigenDetail, useVaartuigMarktDetail } from "../data/useDetailData";
+import { mockRelaties } from "../data/mock-relatie-data";
 import svgPaths from "../../imports/svg-62fj7rjvas";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
 import imgAvatar1 from "../../assets/3627de284acb374a4d9313b3c2dbaeeb87a48224.png";
@@ -70,6 +72,7 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
   const [activeTab, setActiveTab] = useState<'matches' | 'onderhandelingen' | 'activiteit'>('matches');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [selectedNegotiationId, setSelectedNegotiationId] = useState<string | null>(null);
+  const [conversationDialog, setConversationDialog] = useState<{ relatieId: string; relatieName: string } | null>(null);
 
   const [matchPage, setMatchPage] = useState(1);
   const [matchRowsPerPage, setMatchRowsPerPage] = useState(50);
@@ -238,7 +241,13 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
                 data={matchTableData}
                 hoveredRowId={hoveredRow}
                 onRowHover={setHoveredRow}
-                onRowClick={() => {}}
+                onRowClick={(row) => {
+                  const relatie = mockRelaties.find(r => r.naam === row.company);
+                  setConversationDialog({
+                    relatieId: relatie?.id || "rel-001",
+                    relatieName: (row.company as string) || "Onbekend",
+                  });
+                }}
               />
             </>
           )}
@@ -275,6 +284,17 @@ export default function VaartuigDetailPanel({ id, onClose }: VaartuigDetailPanel
         <NegotiationDialog
           negotiationId={selectedNegotiationId}
           onClose={() => setSelectedNegotiationId(null)}
+        />
+      )}
+
+      {/* Conversation dialog */}
+      {conversationDialog && (
+        <ConversationDialog
+          relatieId={conversationDialog.relatieId}
+          relatieName={conversationDialog.relatieName}
+          preSelectedItemId={id}
+          preSelectedItemType="vaartuig"
+          onClose={() => setConversationDialog(null)}
         />
       )}
     </>

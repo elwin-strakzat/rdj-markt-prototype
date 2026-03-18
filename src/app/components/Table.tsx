@@ -175,6 +175,8 @@ interface TableProps {
   data: RowData[];
   /** Row click handler */
   onRowClick?: (row: RowData) => void;
+  /** Action button click handler (e.g. "+ Onderhandeling"). Falls back to onRowClick if not provided. */
+  onRowAction?: (row: RowData) => void;
   /** Id of the row that is currently active (e.g. open in a detail panel) */
   activeRowId?: string | null;
   /** Enable row checkboxes */
@@ -575,6 +577,7 @@ export default function Table({
   columns,
   data,
   onRowClick,
+  onRowAction,
   activeRowId,
   selectable = false,
   selectedIds = [],
@@ -659,7 +662,8 @@ export default function Table({
                 ? "flex-1 min-w-[400px]"
                 : `${col.width ?? "w-[120px]"} shrink-0`;
 
-              const cellContent = renderCell(row, col, rowIndex, (col.type === "leading-text" && onRowClick) ? () => onRowClick(row) : undefined);
+              const actionHandler = onRowAction ?? onRowClick;
+              const cellContent = renderCell(row, col, rowIndex, (col.type === "leading-text" && actionHandler) ? () => actionHandler(row) : undefined);
 
               return (
                 <div key={col.key} className={widthCls}>
