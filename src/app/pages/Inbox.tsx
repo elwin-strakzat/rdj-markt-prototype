@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useDetailPanel } from "../components/DetailPanelContext";
 import { toast, Toaster } from "sonner";
 import Sidebar from "../components/Sidebar";
 import AddInboxItemModal from "../components/AddInboxItemModal";
@@ -283,7 +282,6 @@ const mockInboxData: InboxItem[] = [
 
 export default function Inbox() {
   const navigate = useNavigate();
-  const { openDetail, activeDetail } = useDetailPanel();
   const { data: apiItems, loading, error, refetch } = useInboxLadingen();
   const [localItems, setLocalItems] = useState<InboxItem[] | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
@@ -517,8 +515,7 @@ export default function Inbox() {
             <Table
               columns={columns}
               data={tableData}
-              onRowClick={(row) => openDetail('lading', row.id)}
-              activeRowId={activeDetail?.type === 'lading' ? activeDetail.id : null}
+              onRowClick={(row) => navigate(`/markt/inbox/lading/${row.id}`)}
               hoveredRowId={hoveredRow}
               onRowHover={setHoveredRow}
             />

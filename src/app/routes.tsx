@@ -1,5 +1,4 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
-import { DetailPanelProvider } from "./components/DetailPanelContext";
 import Bevrachting from "./pages/Bevrachting";
 import Inbox from "./pages/Inbox";
 import InboxVessels from "./pages/InboxVessels";
@@ -26,11 +25,7 @@ import Vloot from "./pages/Vloot";
 import VlootVaartuigDetail from "./pages/VlootVaartuigDetail";
 
 function RootLayout() {
-  return (
-    <DetailPanelProvider>
-      <Outlet />
-    </DetailPanelProvider>
-  );
+  return <Outlet />;
 }
 
 function NotFound() {

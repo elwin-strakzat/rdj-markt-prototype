@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import { useNavigate } from "react-router";
-import { useDetailPanel } from "./DetailPanelContext";
 import svgPaths from "../../imports/svg-5yigdc067t";
 
 export interface MapCargoItem {
@@ -640,7 +639,6 @@ interface InboxMapViewProps {
 
 export default function InboxMapView({ mode }: InboxMapViewProps) {
   const navigate = useNavigate();
-  const { openDetail } = useDetailPanel();
   const [selectedCluster, setSelectedCluster] = useState<{ lat: number; lng: number; items: MapCargoItem[] } | null>(null);
   const [selectedClusterKey, setSelectedClusterKey] = useState<string | null>(null);
   const [items] = useState<MapCargoItem[]>(mapCargoData);
@@ -718,7 +716,7 @@ export default function InboxMapView({ mode }: InboxMapViewProps) {
               <div 
                 key={item.id}
                 className="bg-white border border-[#eaecf0] rounded-[8px] p-[16px] hover:shadow-sm transition-shadow cursor-pointer"
-                onClick={() => openDetail('lading', item.id)}
+                onClick={() => navigate(`/markt/inbox/lading/${item.id}`)}
               >
                 {/* Title + avatar */}
                 <div className="flex items-start justify-between mb-[10px]">

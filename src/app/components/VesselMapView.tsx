@@ -1,6 +1,5 @@
 import L from "leaflet";
 import { useNavigate } from "react-router";
-import { useDetailPanel } from "./DetailPanelContext";
 import svgPaths from "../../imports/svg-gjl6m1r792";
 
 export interface MapVesselItem {
@@ -483,7 +482,6 @@ function ZoomControls() {
 
 export default function VesselMapView() {
   const navigate = useNavigate();
-  const { openDetail } = useDetailPanel();
   const [selectedCluster, setSelectedCluster] = useState<{ lat: number; lng: number; items: MapVesselItem[] } | null>(null);
   const [selectedClusterKey, setSelectedClusterKey] = useState<string | null>(null);
   const [items] = useState<MapVesselItem[]>(mapVesselData);
@@ -560,7 +558,7 @@ export default function VesselMapView() {
               <div
                 key={item.id}
                 className="bg-white border border-[#eaecf0] rounded-[8px] p-[16px] hover:shadow-sm transition-shadow cursor-pointer"
-                onClick={() => openDetail('vaartuig', item.id)}
+                onClick={() => navigate(`/markt/inbox/vaartuig/${item.id}`)}
               >
                 {/* Name + avatar */}
                 <div className="flex items-start justify-between mb-[4px]">

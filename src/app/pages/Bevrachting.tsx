@@ -16,7 +16,6 @@ import Pagination from "../components/Pagination";
 import { mockCargos, mockVessels, Cargo, Vessel } from "../data/mock-data";
 import svgPaths from "../../imports/svg-5lxjaeghl9";
 import FloatingActionBar from "../components/FloatingActionBar";
-import { useDetailPanel } from "../components/DetailPanelContext";
 import { useBevrachtingData, type BevrachtingCargo, type BevrachtingVessel } from "../data/useMarktData";
 
 /* ── Status mapping for table view ── */
@@ -46,7 +45,6 @@ export default function Bevrachting() {
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const { openDetail, activeDetail } = useDetailPanel();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
   
@@ -397,8 +395,7 @@ export default function Bevrachting() {
             <Table
               columns={activeTab === 'ladingen' ? tableColumns : vesselTableColumns}
               data={activeTab === 'ladingen' ? tableData : vesselTableData}
-              onRowClick={(row) => openDetail(activeTab === 'ladingen' ? 'lading' : 'vaartuig', row.id)}
-              activeRowId={activeDetail?.id ?? null}
+              onRowClick={(row) => navigate(`/markt/bevrachting/${activeTab === 'ladingen' ? 'lading' : 'vaartuig'}/${row.id}`)}
               hoveredRowId={hoveredRow}
               onRowHover={setHoveredRow}
             />

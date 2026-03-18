@@ -1,5 +1,5 @@
 import { useDrag } from "react-dnd";
-import { useDetailPanel } from "./DetailPanelContext";
+import { useNavigate } from "react-router";
 import imgAvatar from "../../assets/a2737d3b5b234fc04041650cb9f114889c6859da.png";
 import { Vessel } from "../data/mock-data";
 
@@ -8,8 +8,7 @@ interface VesselCardProps {
 }
 
 export default function VesselCard({ vessel }: VesselCardProps) {
-  const { openDetail, activeDetail } = useDetailPanel();
-  const isActive = activeDetail?.type === 'vaartuig' && activeDetail.id === vessel.id;
+  const navigate = useNavigate();
   const [{ isDragging }, drag] = useDrag({
     type: 'VESSEL',
     item: { id: vessel.id },
@@ -19,10 +18,10 @@ export default function VesselCard({ vessel }: VesselCardProps) {
   });
 
   return (
-    <div onClick={() => openDetail('vaartuig', vessel.id)}>
+    <div onClick={() => navigate(`/markt/bevrachting/vaartuig/${vessel.id}`)}>
       <div
         ref={drag}
-        className={`bg-rdj-bg-primary border rounded-[8px] p-[16px] hover:shadow-md transition-shadow cursor-pointer ${isDragging ? 'opacity-50' : ''} ${isActive ? 'ring-2 ring-rdj-fg-brand border-rdj-fg-brand' : 'border-rdj-border-secondary'}`}
+        className={`bg-rdj-bg-primary border border-rdj-border-secondary rounded-[8px] p-[16px] hover:shadow-md transition-shadow cursor-pointer ${isDragging ? 'opacity-50' : ''}`}
       >
         {/* Top Row */}
         <div className="flex items-start gap-[10px] mb-[12px] w-full">
