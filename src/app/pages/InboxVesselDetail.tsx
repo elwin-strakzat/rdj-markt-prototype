@@ -46,7 +46,7 @@ export default function InboxVesselDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: summary, loading: summaryLoading } = useInboxVaartuigSummary(id);
-  const [conversationDialog, setConversationDialog] = useState<{ relatieId: string; relatieName: string } | null>(null);
+  const [conversationDialog, setConversationDialog] = useState<{ relatieId: string; relatieName: string; matchName?: string } | null>(null);
 
   const handleArchive = () => {
     toast.success("Vaartuig gearchiveerd", { description: "Het vaartuig is verwijderd uit de inbox.", duration: 3000 });
@@ -77,9 +77,9 @@ export default function InboxVesselDetail() {
 
   // Mock match data for vessel
   const matchRows: RowData[] = [
-    { id: "1", lading: "3.000 ton Houtpellets (0571)", ladingSubtext: "Eigen", relatie: "Rederij de Jong", relatieContact: undefined, laden: "Rotterdam Botlek", ladenDatum: "Mrt 2025", lossen: "Deventer IJssel", lossenDatum: "Mrt 2025", matchPct: 90, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Rederij de Jong"); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
-    { id: "2", lading: "1.000 - 2.000 ton Hout", ladingSubtext: "Openen (1)", relatie: "Markel Freight B.V.", relatieContact: "H.Q. Duivenvoorde", laden: "Moerdijk Industriehaven", ladenDatum: "Jan 2024", lossen: "Amsterdam Westhaven", lossenDatum: "Jan 2024", matchPct: 75, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Markel Freight B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
-    { id: "3", lading: "Af te stemmen ton Houtpellets", ladingSubtext: undefined, relatie: "Buiten Onszelf N.V.", relatieContact: "Lisa Aelbrechtse", laden: "Antwerpen", ladenDatum: "Do 10 Jan: 10:00", lossen: "Rotterdam Europoort", lossenDatum: "Mrt 2025", matchPct: 60, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Buiten Onszelf N.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "1", lading: "Houtpellets Salzgitter", ladingSubtext: "2.000 ton · Houtpellets (DSIT)", relatie: "Provaart Logistics BV", relatieContact: "Jan de Vries", laden: "Salzgitter Stichkanal", ladenDatum: "Vr 14 Mrt 2026", lossen: "Hamburg Veddelkanal", lossenDatum: "Di 18 Mrt 2026", matchPct: 90, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Provaart Logistics BV"); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "2", lading: "Staal Dordrecht–Antwerpen", ladingSubtext: "3.000 ton · Staal", relatie: "Janlow B.V.", relatieContact: "Pieter Jansen", laden: "Dordrecht", ladenDatum: "Za 15 Mrt 2026", lossen: "Antwerpen", lossenDatum: "Ma 17 Mrt 2026", matchPct: 75, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Janlow B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "3", lading: "Sojabonen Rotterdam", ladingSubtext: "3.500 ton · Sojabonen", relatie: "Cargill N.V.", relatieContact: "Sophie van Dam", laden: "Rotterdam Botlek", ladenDatum: "Zo 16 Mrt 2026", lossen: "Basel", lossenDatum: "Do 20 Mrt 2026", matchPct: 60, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Cargill N.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
   ];
 
   return (
@@ -140,6 +140,7 @@ export default function InboxVesselDetail() {
                         setConversationDialog({
                           relatieId: relatie?.id || "rel-001",
                           relatieName: (row.relatie as string) || "Onbekend",
+                          matchName: row.lading as string,
                         });
                       }}
                     />
@@ -165,8 +166,8 @@ export default function InboxVesselDetail() {
         <ConversationDialog
           relatieId={conversationDialog.relatieId}
           relatieName={conversationDialog.relatieName}
-          preSelectedItemId={id}
-          preSelectedItemType="vaartuig"
+          preSelectedMatchName={conversationDialog.matchName}
+          preSelectedOriginId={id}
           onClose={() => setConversationDialog(null)}
         />
       )}

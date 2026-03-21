@@ -48,7 +48,7 @@ export default function InboxCargoDetail() {
   const navigate = useNavigate();
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [offeredMatches, setOfferedMatches] = useState<Set<string>>(new Set());
-  const [conversationDialog, setConversationDialog] = useState<{ relatieId: string; relatieName: string } | null>(null);
+  const [conversationDialog, setConversationDialog] = useState<{ relatieId: string; relatieName: string; matchName?: string } | null>(null);
   const { data: summary, loading: summaryLoading } = useInboxLadingSummary(id);
 
   useEffect(() => {
@@ -81,8 +81,8 @@ export default function InboxCargoDetail() {
 
   // Mock match data
   const matchRows: RowData[] = [
-    { id: "1", name: "Aar", subtype: "Motorschip", statusBadge: offeredMatches.has("1") ? "Aangeboden" : undefined, company: "Andermans B.V.", contact: "Cees Andoormans", location: "Europahafen (Maassluis)", locationDate: "Vanaf Ma 13 Jan, 2025", capacity: "3.519 mt", content: "4.200 m³", matchPct: 90, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Andermans B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
-    { id: "2", name: "Agaat", subtype: "Motorschip", statusBadge: offeredMatches.has("2") ? "Aangeboden" : undefined, company: "Markel Freight B.V.", contact: "H.Q. Duivenvoorde", location: "Maasvlakte", locationDate: "Vanaf Di 14 Jan, 2025", capacity: "2.085 mt", content: "2.500 m³", matchPct: 85, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Markel Freight B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "1", name: "Emily", subtype: "Motorschip", statusBadge: offeredMatches.has("1") ? "Aangeboden" : undefined, company: "Provaart Logistics BV", contact: "Jan de Vries", location: "Waalhaven", locationDate: "Vanaf Wo 12 Mrt, 2026", capacity: "3.000 mt", content: "3.800 m³", matchPct: 90, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Provaart Logistics BV"); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
+    { id: "2", name: "S.S. Anna", subtype: "Motorschip", statusBadge: offeredMatches.has("2") ? "Aangeboden" : undefined, company: "Janlow B.V.", contact: "Pieter Jansen", location: "Bremerhaven", locationDate: "Vanaf Vr 14 Mrt, 2026", capacity: "2.500 mt", content: "3.000 m³", matchPct: 85, onRelatieClick: () => { const rel = mockRelaties.find(r => r.naam === "Janlow B.V."); if (rel) navigate(`/crm/relatie/${rel.id}`); } },
   ];
 
   const handleMatchClick = (row: RowData) => {
@@ -160,6 +160,7 @@ export default function InboxCargoDetail() {
                         setConversationDialog({
                           relatieId: relatie?.id || "rel-001",
                           relatieName: (row.company as string) || "Onbekend",
+                          matchName: row.name as string,
                         });
                       }}
                     />
@@ -192,8 +193,8 @@ export default function InboxCargoDetail() {
         <ConversationDialog
           relatieId={conversationDialog.relatieId}
           relatieName={conversationDialog.relatieName}
-          preSelectedItemId={id}
-          preSelectedItemType="lading"
+          preSelectedMatchName={conversationDialog.matchName}
+          preSelectedOriginId={id}
           onClose={() => setConversationDialog(null)}
         />
       )}
