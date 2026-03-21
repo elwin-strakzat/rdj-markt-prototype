@@ -84,18 +84,71 @@ export default function Bevrachting() {
   const handleSaveConditions = (conditions: ConditionsData) => {
     if (!modalCargo) return;
 
-    setCargos(cargos.map(c => 
-      c.id === modalCargo.id 
-        ? { 
-            ...c, 
-            status: 'werklijst',
-            conditions: {
-              ...c.conditions,
-              markt: conditions
-            }
-          } 
-        : c
-    ));
+    // Parse total tonnage from the cargo weight string
+    // Support range format "0–500 ton X" — use the highest number as total
+    const rangeWeightMatch = modalCargo.weight.match(/^([\d.,]+)\s*[–-]\s*([\d.,]+)\s*ton/);
+    const singleWeightMatch = modalCargo.weight.match(/([\d.]+)\s*ton/);
+    const totalTonnage = rangeWeightMatch
+      ? parseFloat(rangeWeightMatch[2].replace(/\./g, ''))
+      : (singleWeightMatch ? parseFloat(singleWeightMatch[1].replace(/\./g, '')) : 0);
+
+    const minVal = parseFloat(conditions.tonnageMin.replace(/\./g, '').replace(',', '.')) || 0;
+    const maxVal = conditions.tonnageMax.trim()
+      ? parseFloat(conditions.tonnageMax.replace(/\./g, '').replace(',', '.')) || 0
+      : 0;
+    const isRange = maxVal > 0 && maxVal !== minVal;
+
+    // Remaining is based on minVal for ranges (max remaining when least goes to werklijst)
+    const effectiveMax = isRange ? maxVal : minVal;
+    const remainingMax = totalTonnage - minVal;
+    const remainingMin = isRange ? totalTonnage - maxVal : remainingMax;
+    // There's a remaining split when min > 0 but less than the full cargo.
+    // When min is 0 (e.g. rest card "0–3.000"), the card just moves entirely.
+    const hasRemaining = minVal > 0 && minVal < totalTonnage;
+
+    // Extract cargo type from weight string (e.g. "Houtpellets (DSIT)")
+    const typeMatch = modalCargo.weight.match(/[\d.]+\s*ton\s+(.+)/);
+    const cargoType = typeMatch ? typeMatch[1] : '';
+
+    const formatTonnage = (t: number) =>
+      t.toLocaleString('nl-NL', { maximumFractionDigits: 0 });
+
+    // Build the werklijst card
+    const werklijstCard: Cargo = {
+      ...modalCargo,
+      status: 'werklijst' as const,
+      conditions: {
+        ...modalCargo.conditions,
+        markt: conditions,
+      },
+    };
+
+    // Split when not the full tonnage goes to werklijst
+    if (hasRemaining) {
+      // Remaining card shows a range if werklijst was a range, otherwise fixed
+      const remainingWeight = isRange && remainingMin !== remainingMax
+        ? `${formatTonnage(remainingMin)}–${formatTonnage(remainingMax)} ton ${cargoType}`
+        : `${formatTonnage(remainingMax)} ton ${cargoType}`;
+
+      const remainingCard: Cargo = {
+        ...modalCargo,
+        id: `${modalCargo.id}-rest`,
+        cargo: remainingWeight,
+        weight: remainingWeight,
+        status: 'intake' as const,
+        conditions: undefined,
+      };
+
+      setCargos(cargos.flatMap(c =>
+        c.id === modalCargo.id ? [werklijstCard, remainingCard] : [c]
+      ));
+    } else {
+      // Full tonnage goes to werklijst
+      setCargos(cargos.map(c =>
+        c.id === modalCargo.id ? werklijstCard : c
+      ));
+    }
+
     setModalCargo(null);
   };
 
@@ -152,9 +205,15 @@ export default function Bevrachting() {
     const ladingType = rawType.replace(/\s*\([^)]+\)/, '').trim();
     const ladingSG = sgMatch ? `SG ${sgMatch[1]}` : '';
 
-    // Extract tonnage from weight
-    const tonMatch = c.weight.match(/([\d.]+)\s*ton/);
-    const tonnage = tonMatch ? `${tonMatch[1]} t` : c.weight;
+    // Extract tonnage - show range from conditions if available
+    let tonnage: string;
+    if (c.conditions?.markt) {
+      const { tonnageMin, tonnageMax } = c.conditions.markt;
+      tonnage = tonnageMax ? `${tonnageMin}–${tonnageMax} t` : `${tonnageMin} t`;
+    } else {
+      const tonMatch = c.weight.match(/([\d.]+)\s*ton/);
+      tonnage = tonMatch ? `${tonMatch[1]} t` : c.weight;
+    }
 
     // Mock deadlines per status
     const deadlineMap: Record<string, string> = {
