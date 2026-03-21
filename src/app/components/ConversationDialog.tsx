@@ -56,6 +56,8 @@ interface ConversationDialogProps {
   relatieName: string;
   preSelectedItemId?: string;
   preSelectedItemType?: "lading" | "vaartuig";
+  preSelectedMatchName?: string;
+  preSelectedOriginId?: string;
   onClose: () => void;
   onSave?: () => void;
 }
@@ -67,21 +69,28 @@ export default function ConversationDialog({
   relatieName,
   preSelectedItemId,
   preSelectedItemType,
+  preSelectedMatchName,
+  preSelectedOriginId,
   onClose,
   onSave,
 }: ConversationDialogProps) {
   const getInitialTab = (): TabValue => {
-    if (preSelectedItemType === "lading") return "eigen-ladingen";
-    if (preSelectedItemType === "vaartuig") return "eigen-vaartuigen";
+    if (!preSelectedMatchName) {
+      if (preSelectedItemType === "lading") return "eigen-ladingen";
+      if (preSelectedItemType === "vaartuig") return "eigen-vaartuigen";
+    }
     return "eigen-ladingen";
   };
 
   const [activeTab, setActiveTab] = useState<TabValue>(getInitialTab);
-  const [selectedLeftId, setSelectedLeftId] = useState<string | null>(preSelectedItemId ?? null);
+  const [selectedLeftId, setSelectedLeftId] = useState<string | null>(preSelectedMatchName ? null : (preSelectedItemId ?? null));
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [itemStatuses, setItemStatuses] = useState<Map<string, ItemStatus>>(new Map());
   const [itemConditions, setItemConditions] = useState<Map<string, ConditionValues>>(new Map());
   const [itemBidConditions, setItemBidConditions] = useState<Map<string, ConditionValues>>(new Map());
-  const [expandedConditions, setExpandedConditions] = useState<Set<string>>(new Set());
+  const [expandedConditions, setExpandedConditions] = useState<Set<string>>(
+    preSelectedItemId ? new Set([preSelectedItemId]) : new Set()
+  );
   const [addingItem, setAddingItem] = useState<"lading" | "vaartuig" | null>(null);
   const [showMarktLadingen, setShowMarktLadingen] = useState(false);
   const [showMarktVaartuigen, setShowMarktVaartuigen] = useState(false);
@@ -94,11 +103,24 @@ export default function ConversationDialog({
   const [relatieLadingenItems, setRelatieLadingenItems] = useState<DisplayItem[]>([]);
   const [relatieVaartuigenItems, setRelatieVaartuigenItems] = useState<DisplayItem[]>([]);
 
+  const initialTabRef = useRef(true);
+  const matchAppliedRef = useRef(false);
+  const skipNextTabClearRef = useRef(false);
+  const originAppliedRef = useRef(false);
+
   useEffect(() => {
     loadData();
   }, [relatieId]);
 
   useEffect(() => {
+    if (initialTabRef.current) {
+      initialTabRef.current = false;
+      return;
+    }
+    if (skipNextTabClearRef.current) {
+      skipNextTabClearRef.current = false;
+      return;
+    }
     setSelectedLeftId(null);
   }, [activeTab]);
 
@@ -216,7 +238,93 @@ export default function ConversationDialog({
         kind: "vaartuig" as const,
       }))
     );
+
+    setDataLoaded(true);
   }
+
+  // After data loads, find and select the matched item by name
+  useEffect(() => {
+    if (!dataLoaded || matchAppliedRef.current || !preSelectedMatchName) return;
+
+    // Search relatie vaartuigen first (most common when clicking vessel matches from markt cargo)
+    const rv = relatieVaartuigenItems.find(v => v.title === preSelectedMatchName);
+    if (rv) {
+      matchAppliedRef.current = true;
+      skipNextTabClearRef.current = true;
+      setActiveTab("vaartuigen-relatie");
+      setSelectedLeftId(rv.id);
+      setExpandedConditions(new Set([rv.id]));
+      return;
+    }
+
+    // Search eigen vaartuigen
+    const ev = eigenVaartuigen.find(v => v.title === preSelectedMatchName);
+    if (ev) {
+      matchAppliedRef.current = true;
+      skipNextTabClearRef.current = true;
+      setActiveTab("eigen-vaartuigen");
+      setSelectedLeftId(ev.id);
+      setExpandedConditions(new Set([ev.id]));
+      return;
+    }
+
+    // Search relatie ladingen
+    const rl = relatieLadingenItems.find(l => l.title === preSelectedMatchName);
+    if (rl) {
+      matchAppliedRef.current = true;
+      skipNextTabClearRef.current = true;
+      setActiveTab("ladingen-relatie");
+      setSelectedLeftId(rl.id);
+      setExpandedConditions(new Set([rl.id]));
+      return;
+    }
+
+    // Search eigen ladingen
+    const el = eigenLadingen.find(l => l.title === preSelectedMatchName);
+    if (el) {
+      matchAppliedRef.current = true;
+      skipNextTabClearRef.current = true;
+      setActiveTab("eigen-ladingen");
+      setSelectedLeftId(el.id);
+      setExpandedConditions(new Set([el.id]));
+      return;
+    }
+  }, [dataLoaded, preSelectedMatchName, relatieVaartuigenItems, eigenVaartuigen, relatieLadingenItems, eigenLadingen]);
+
+  // After vessel is selected, expand origin cargo conditions on the right panel
+  useEffect(() => {
+    if (!preSelectedOriginId || originAppliedRef.current || !selectedLeftId || !dataLoaded) return;
+
+    // Check eigen ladingen
+    if (eigenLadingen.some(l => l.id === preSelectedOriginId)) {
+      originAppliedRef.current = true;
+      setExpandedConditions(prev => new Set(prev).add(preSelectedOriginId));
+      return;
+    }
+
+    // Check markt ladingen — enable the toggle so it appears in rightItems
+    if (marktLadingen.some(l => l.id === preSelectedOriginId)) {
+      originAppliedRef.current = true;
+      setShowMarktLadingen(true);
+      setExpandedConditions(prev => new Set(prev).add(preSelectedOriginId));
+      return;
+    }
+
+    // Check eigen vaartuigen
+    if (eigenVaartuigen.some(v => v.id === preSelectedOriginId)) {
+      originAppliedRef.current = true;
+      setExpandedConditions(prev => new Set(prev).add(preSelectedOriginId));
+      return;
+    }
+
+    // Check markt vaartuigen — enable the toggle so it appears in rightItems
+    if (marktVaartuigen.some(v => v.id === preSelectedOriginId)) {
+      originAppliedRef.current = true;
+      setShowMarktVaartuigen(true);
+      setExpandedConditions(prev => new Set(prev).add(preSelectedOriginId));
+      return;
+    }
+  }, [selectedLeftId, preSelectedOriginId, dataLoaded, eigenLadingen, marktLadingen, eigenVaartuigen, marktVaartuigen]);
 
   const combinedLadingen = showMarktLadingen ? [...eigenLadingen, ...marktLadingen] : eigenLadingen;
   const combinedVaartuigen = showMarktVaartuigen ? [...eigenVaartuigen, ...marktVaartuigen] : eigenVaartuigen;
@@ -292,7 +400,7 @@ export default function ConversationDialog({
         .filter(m => m.ladingId === selectedLeftId)
         .filter(m => m.isEigen || showMarktVaartuigen);
       if (realMatches.length > 0) {
-        return realMatches
+        const results: MatchDisplayItem[] = realMatches
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
           .map(m => ({
             id: m.id,
@@ -303,6 +411,17 @@ export default function ConversationDialog({
             kind: "vaartuig" as const,
             matchPercentage: m.matchPercentage,
           }));
+        // Include origin item if not already in results
+        if (preSelectedOriginId) {
+          const originInResults = results.some(r => r.id === preSelectedOriginId);
+          if (!originInResults) {
+            const originItem = rightItems.find(ri => ri.id === preSelectedOriginId);
+            if (originItem) {
+              results.push({ ...originItem, matchPercentage: generateScore(selectedLeftId, originItem.id) });
+            }
+          }
+        }
+        return results;
       }
       return rightItems
         .map(item => ({ ...item, matchPercentage: generateScore(selectedLeftId, item.id) }))
@@ -314,7 +433,7 @@ export default function ConversationDialog({
         .filter(m => m.vaartuigId === selectedLeftId)
         .filter(m => m.isEigen || showMarktLadingen);
       if (realMatches.length > 0) {
-        return realMatches
+        const results: MatchDisplayItem[] = realMatches
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
           .map(m => ({
             id: m.id,
@@ -329,6 +448,17 @@ export default function ConversationDialog({
             loslocatie: m.losHaven,
             losdatum: m.losDatum,
           }));
+        // Include origin item if not already in results
+        if (preSelectedOriginId) {
+          const originInResults = results.some(r => r.id === preSelectedOriginId);
+          if (!originInResults) {
+            const originItem = rightItems.find(ri => ri.id === preSelectedOriginId);
+            if (originItem) {
+              results.push({ ...originItem, matchPercentage: generateScore(selectedLeftId, originItem.id) });
+            }
+          }
+        }
+        return results;
       }
       return rightItems
         .map(item => ({ ...item, matchPercentage: generateScore(selectedLeftId, item.id) }))

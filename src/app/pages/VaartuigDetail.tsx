@@ -25,10 +25,10 @@ import imgAvatar4 from "../../assets/9e45f45f537bea4bf653bc0307471e5ff5545f63.pn
 
 /* ── Mock vessel matches (ladingen die passen bij dit vaartuig) ── */
 const vesselMatches = [
-  { id: 'VM001', cargo: '3.000 ton Houtpellets (DSIT)', company: 'Rederij de Jong', contactPersoon: 'Pieter de Jong', laadHaven: 'Salzgitter Stichkanal', laadDatum: 'Ma 12 Jan 10:00', losHaven: 'Hamburg Veddelkanal', losDatum: 'Vr 16 Jan 14:00', matchPercentage: 92, isEigen: true, source: 'Rederij de Jong', sourceDate: 'Do 5 Feb 12:44' },
-  { id: 'VM002', cargo: '2.000 ton Koolraapzaad', company: 'Agro Delta Groep', contactPersoon: 'Jaeger den Oud', laadHaven: 'Rotterdam Europoort', laadDatum: 'Do 15 Jan 08:00', losHaven: 'Mannheim', losDatum: 'Ma 19 Jan', matchPercentage: 85, isEigen: false, source: 'Automatische feed', sourceDate: 'Do 5 Feb 12:44' },
-  { id: 'VM003', cargo: '2.000 ton Houtpellets', company: 'Provaart Logistics BV', contactPersoon: 'Frits van Dam', laadHaven: 'Rotterdam Europoort', laadDatum: 'Do 15 Jan 08:00', losHaven: 'Mannheim', losDatum: 'Af te stemmen', matchPercentage: 78, isEigen: false, source: 'Automatische feed', sourceDate: 'Do 5 Feb 13:24' },
-  { id: 'VM004', cargo: '1.500 ton Graan', company: 'Cargill N.V.', contactPersoon: 'Lisa Abraham', laadHaven: 'Bremerhaven', laadDatum: 'Ma 19 Jan', losHaven: 'Duisburg', losDatum: 'Wo 21 Jan', matchPercentage: 65, isEigen: false, source: 'Automatische feed', sourceDate: 'Vr 6 Feb 09:01' },
+  { id: 'VM001', cargo: 'Houtpellets Salzgitter', company: 'Provaart Logistics BV', contactPersoon: 'Jan de Vries', laadHaven: 'Salzgitter Stichkanal', laadDatum: 'Vr 14 Mrt 10:00', losHaven: 'Hamburg Veddelkanal', losDatum: 'Di 18 Mrt 14:00', matchPercentage: 92, isEigen: false, source: 'Automatische feed', sourceDate: 'Do 6 Mrt 12:44' },
+  { id: 'VM002', cargo: 'Staal Dordrecht–Antwerpen', company: 'Janlow B.V.', contactPersoon: 'Pieter Jansen', laadHaven: 'Dordrecht', laadDatum: 'Za 15 Mrt 06:00', losHaven: 'Antwerpen', losDatum: 'Ma 17 Mrt 14:00', matchPercentage: 85, isEigen: false, source: 'Automatische feed', sourceDate: 'Do 6 Mrt 15:45' },
+  { id: 'VM003', cargo: 'Sojabonen Rotterdam', company: 'Cargill N.V.', contactPersoon: 'Sophie van Dam', laadHaven: 'Rotterdam Botlek', laadDatum: 'Zo 16 Mrt 08:00', losHaven: 'Basel', losDatum: 'Do 20 Mrt', matchPercentage: 78, isEigen: false, source: 'Automatische feed', sourceDate: 'Do 6 Mrt 10:30' },
+  { id: 'VM004', cargo: 'Graan Rotterdam–Krefeld', company: 'Provaart Logistics BV', contactPersoon: 'Maria Bakker', laadHaven: 'Rotterdam', laadDatum: 'Di 18 Mrt 08:00', losHaven: 'Krefeld', losDatum: 'Vr 21 Mrt', matchPercentage: 65, isEigen: false, source: 'Automatische feed', sourceDate: 'Vr 7 Mrt 09:15' },
 ];
 
 /* ── Mock onderhandelingen ── */
@@ -71,7 +71,7 @@ export default function VaartuigDetail() {
   const [activeTab, setActiveTab] = useState<'matches' | 'onderhandelingen' | 'activiteit'>('matches');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [selectedNegotiationId, setSelectedNegotiationId] = useState<string | null>(null);
-  const [conversationDialog, setConversationDialog] = useState<{ relatieId: string; relatieName: string } | null>(null);
+  const [conversationDialog, setConversationDialog] = useState<{ relatieId: string; relatieName: string; matchName?: string } | null>(null);
 
   /* Pagination state per tab */
   const [matchPage, setMatchPage] = useState(1);
@@ -274,6 +274,7 @@ export default function VaartuigDetail() {
                             setConversationDialog({
                               relatieId: relatie?.id || "rel-001",
                               relatieName: (row.company as string) || "Onbekend",
+                              matchName: row.cargo as string,
                             });
                           }}
                         />
@@ -331,8 +332,8 @@ export default function VaartuigDetail() {
         <ConversationDialog
           relatieId={conversationDialog.relatieId}
           relatieName={conversationDialog.relatieName}
-          preSelectedItemId={id}
-          preSelectedItemType="vaartuig"
+          preSelectedMatchName={conversationDialog.matchName}
+          preSelectedOriginId={id}
           onClose={() => setConversationDialog(null)}
         />
       )}
