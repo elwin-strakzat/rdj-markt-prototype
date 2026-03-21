@@ -85,16 +85,26 @@ export default function Bevrachting() {
     if (!modalCargo) return;
 
     // Parse total tonnage from the cargo weight string
-    const totalMatch = modalCargo.weight.match(/([\d.]+)\s*ton/);
-    const totalTonnage = totalMatch ? parseFloat(totalMatch[1].replace(/\./g, '')) : 0;
+    // Support range format "0–500 ton X" — use the highest number as total
+    const rangeWeightMatch = modalCargo.weight.match(/^([\d.,]+)\s*[–-]\s*([\d.,]+)\s*ton/);
+    const singleWeightMatch = modalCargo.weight.match(/([\d.]+)\s*ton/);
+    const totalTonnage = rangeWeightMatch
+      ? parseFloat(rangeWeightMatch[2].replace(/\./g, ''))
+      : (singleWeightMatch ? parseFloat(singleWeightMatch[1].replace(/\./g, '')) : 0);
 
-    // The effective max determines how much goes to werklijst
     const minVal = parseFloat(conditions.tonnageMin.replace(/\./g, '').replace(',', '.')) || 0;
     const maxVal = conditions.tonnageMax.trim()
       ? parseFloat(conditions.tonnageMax.replace(/\./g, '').replace(',', '.')) || 0
-      : minVal;
-    const werklijstTonnage = maxVal;
-    const remaining = totalTonnage - werklijstTonnage;
+      : 0;
+    const isRange = maxVal > 0 && maxVal !== minVal;
+
+    // Remaining is based on minVal for ranges (max remaining when least goes to werklijst)
+    const effectiveMax = isRange ? maxVal : minVal;
+    const remainingMax = totalTonnage - minVal;
+    const remainingMin = isRange ? totalTonnage - maxVal : remainingMax;
+    // There's a remaining split when min > 0 but less than the full cargo.
+    // When min is 0 (e.g. rest card "0–3.000"), the card just moves entirely.
+    const hasRemaining = minVal > 0 && minVal < totalTonnage;
 
     // Extract cargo type from weight string (e.g. "Houtpellets (DSIT)")
     const typeMatch = modalCargo.weight.match(/[\d.]+\s*ton\s+(.+)/);
@@ -113,13 +123,18 @@ export default function Bevrachting() {
       },
     };
 
-    if (remaining > 0) {
-      // Split: werklijst card + remaining intake card
+    // Split when not the full tonnage goes to werklijst
+    if (hasRemaining) {
+      // Remaining card shows a range if werklijst was a range, otherwise fixed
+      const remainingWeight = isRange && remainingMin !== remainingMax
+        ? `${formatTonnage(remainingMin)}–${formatTonnage(remainingMax)} ton ${cargoType}`
+        : `${formatTonnage(remainingMax)} ton ${cargoType}`;
+
       const remainingCard: Cargo = {
         ...modalCargo,
         id: `${modalCargo.id}-rest`,
-        cargo: `${formatTonnage(remaining)} ton ${cargoType}`,
-        weight: `${formatTonnage(remaining)} ton ${cargoType}`,
+        cargo: remainingWeight,
+        weight: remainingWeight,
         status: 'intake' as const,
         conditions: undefined,
       };
