@@ -103,7 +103,11 @@ export default function CargoCard({ cargo }: CargoCardProps) {
             </svg>
           </div>
           <p className="font-sans font-normal leading-[18px] text-[#344054] text-[12px] flex-1 min-w-0 truncate">
-            {cargo.cargo}
+            {cargo.conditions?.markt ? (
+              cargo.conditions.markt.tonnageMax
+                ? `${cargo.conditions.markt.tonnageMin}–${cargo.conditions.markt.tonnageMax} ton (van ${cargo.weight})`
+                : `${cargo.conditions.markt.tonnageMin} ton (van ${cargo.weight})`
+            ) : cargo.cargo}
           </p>
         </div>
 

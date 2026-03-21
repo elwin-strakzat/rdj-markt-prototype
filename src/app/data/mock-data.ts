@@ -25,7 +25,8 @@ export interface Cargo {
       unloadingTime: string;
     };
     markt?: {
-      tonnage: string;
+      tonnageMin: string;
+      tonnageMax: string;
       price: string;
       priceType: string;
       loadingTime: string;
@@ -154,7 +155,9 @@ export const mockCargos: Cargo[] = [
     priceInfo: '€3,00 per ton · 4 uur laden · 8 uur lossen',
     conditions: {
       markt: {
-        tonnage: '1.000 ton',
+        tonnageMin: '500',
+        tonnageMax: '1.000',
+
         price: '€3,00 per ton',
         priceType: 'per ton',
         loadingTime: '4',
@@ -198,7 +201,8 @@ export const mockCargos: Cargo[] = [
     matches: 5,
     conditions: {
       markt: {
-        tonnage: '2.000 ton',
+        tonnageMin: '1.500',
+        tonnageMax: '2.000',
         price: '€3.00 per ton',
         priceType: 'per ton',
         loadingTime: '2',

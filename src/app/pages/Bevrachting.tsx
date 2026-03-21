@@ -84,18 +84,56 @@ export default function Bevrachting() {
   const handleSaveConditions = (conditions: ConditionsData) => {
     if (!modalCargo) return;
 
-    setCargos(cargos.map(c => 
-      c.id === modalCargo.id 
-        ? { 
-            ...c, 
-            status: 'werklijst',
-            conditions: {
-              ...c.conditions,
-              markt: conditions
-            }
-          } 
-        : c
-    ));
+    // Parse total tonnage from the cargo weight string
+    const totalMatch = modalCargo.weight.match(/([\d.]+)\s*ton/);
+    const totalTonnage = totalMatch ? parseFloat(totalMatch[1].replace(/\./g, '')) : 0;
+
+    // The effective max determines how much goes to werklijst
+    const minVal = parseFloat(conditions.tonnageMin.replace(/\./g, '').replace(',', '.')) || 0;
+    const maxVal = conditions.tonnageMax.trim()
+      ? parseFloat(conditions.tonnageMax.replace(/\./g, '').replace(',', '.')) || 0
+      : minVal;
+    const werklijstTonnage = maxVal;
+    const remaining = totalTonnage - werklijstTonnage;
+
+    // Extract cargo type from weight string (e.g. "Houtpellets (DSIT)")
+    const typeMatch = modalCargo.weight.match(/[\d.]+\s*ton\s+(.+)/);
+    const cargoType = typeMatch ? typeMatch[1] : '';
+
+    const formatTonnage = (t: number) =>
+      t.toLocaleString('nl-NL', { maximumFractionDigits: 0 });
+
+    // Build the werklijst card
+    const werklijstCard: Cargo = {
+      ...modalCargo,
+      status: 'werklijst' as const,
+      conditions: {
+        ...modalCargo.conditions,
+        markt: conditions,
+      },
+    };
+
+    if (remaining > 0) {
+      // Split: werklijst card + remaining intake card
+      const remainingCard: Cargo = {
+        ...modalCargo,
+        id: `${modalCargo.id}-rest`,
+        cargo: `${formatTonnage(remaining)} ton ${cargoType}`,
+        weight: `${formatTonnage(remaining)} ton ${cargoType}`,
+        status: 'intake' as const,
+        conditions: undefined,
+      };
+
+      setCargos(cargos.flatMap(c =>
+        c.id === modalCargo.id ? [werklijstCard, remainingCard] : [c]
+      ));
+    } else {
+      // Full tonnage goes to werklijst
+      setCargos(cargos.map(c =>
+        c.id === modalCargo.id ? werklijstCard : c
+      ));
+    }
+
     setModalCargo(null);
   };
 
@@ -152,9 +190,15 @@ export default function Bevrachting() {
     const ladingType = rawType.replace(/\s*\([^)]+\)/, '').trim();
     const ladingSG = sgMatch ? `SG ${sgMatch[1]}` : '';
 
-    // Extract tonnage from weight
-    const tonMatch = c.weight.match(/([\d.]+)\s*ton/);
-    const tonnage = tonMatch ? `${tonMatch[1]} t` : c.weight;
+    // Extract tonnage - show range from conditions if available
+    let tonnage: string;
+    if (c.conditions?.markt) {
+      const { tonnageMin, tonnageMax } = c.conditions.markt;
+      tonnage = tonnageMax ? `${tonnageMin}–${tonnageMax} t` : `${tonnageMin} t`;
+    } else {
+      const tonMatch = c.weight.match(/([\d.]+)\s*ton/);
+      tonnage = tonMatch ? `${tonMatch[1]} t` : c.weight;
+    }
 
     // Mock deadlines per status
     const deadlineMap: Record<string, string> = {

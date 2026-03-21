@@ -16,7 +16,8 @@ interface ConditionsModalProps {
 }
 
 export interface ConditionsData {
-  tonnage: string;
+  tonnageMin: string;
+  tonnageMax: string;
   price: string;
   priceType: 'per-ton' | 'per-m3' | 'blokvracht';
   loadingTime: string;
@@ -28,8 +29,16 @@ export interface ConditionsData {
   remarks: string;
 }
 
+function parseTonnage(value: string): number {
+  return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
 export default function ConditionsModal({ cargo, onClose, onSave }: ConditionsModalProps) {
-  const [tonnage, setTonnage] = useState("1000");
+  // Parse total tonnage from cargo weight string like "3.000 ton Houtpellets"
+  const totalTonnage = parseTonnage(cargo.weight.split(' ')[0]);
+
+  const [tonnageMin, setTonnageMin] = useState(cargo.weight.split(' ')[0]);
+  const [tonnageMax, setTonnageMax] = useState("");
   const [price, setPrice] = useState("4,00");
   const [priceType, setPriceType] = useState<'per-ton' | 'per-m3' | 'blokvracht'>('per-ton');
   const [loadingTime, setLoadingTime] = useState("");
@@ -40,9 +49,24 @@ export default function ConditionsModal({ cargo, onClose, onSave }: ConditionsMo
   const [unloadingCondition, setUnloadingCondition] = useState("conform-nederlands-wettelijk");
   const [remarks, setRemarks] = useState("");
 
+  const minVal = parseTonnage(tonnageMin);
+  const maxVal = parseTonnage(tonnageMax);
+  const hasMax = tonnageMax.trim() !== '';
+  const hasMin = tonnageMin.trim() !== '';
+
+  const minError = hasMin && hasMax && minVal > maxVal ? 'Min mag niet hoger zijn dan max' : '';
+  const maxError = hasMax && hasMin && maxVal < minVal ? 'Max mag niet lager zijn dan min' : '';
+  const hasError = !!minError || !!maxError;
+
+  // Calculate remaining tonnage (as a range when max is set)
+  const remainingFromMax = hasMin ? totalTonnage - (hasMax ? maxVal : minVal) : totalTonnage;
+  const remainingFromMin = hasMax && hasMin ? totalTonnage - minVal : remainingFromMax;
+
   const handleSubmit = () => {
+    if (hasError || !hasMin) return;
     onSave({
-      tonnage,
+      tonnageMin,
+      tonnageMax,
       price,
       priceType,
       loadingTime,
@@ -90,28 +114,55 @@ export default function ConditionsModal({ cargo, onClose, onSave }: ConditionsMo
           {/* Content */}
           <div className="px-[24px] py-[20px] space-y-[20px]">
             {/* Tonnage */}
-            <div className="content-stretch flex gap-[16px] items-end relative shrink-0 w-full">
-              <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-[160px]">
-                <p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#344054] text-[14px] text-left whitespace-nowrap">Tonnage</p>
-                <div className="bg-white content-stretch flex items-start relative rounded-[6px] shrink-0 w-full">
-                  <div aria-hidden="true" className="absolute border border-[#d0d5dd] border-solid inset-0 pointer-events-none rounded-[6px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]" />
-                  <input
-                    type="text"
-                    value={tonnage}
-                    onChange={(e) => setTonnage(e.target.value)}
-                    className="flex-1 px-[12px] py-[8px] font-sans font-normal leading-[20px] text-[#101828] text-[14px] bg-transparent outline-none rounded-l-[6px]"
-                  />
-                  <div className="content-stretch flex items-center px-[12px] py-[8px] relative rounded-br-[8px] rounded-tr-[8px] shrink-0">
-                    <p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#475467] text-[14px] text-left whitespace-nowrap">t</p>
+            <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-full">
+              <p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#344054] text-[14px] text-left whitespace-nowrap">Tonnage</p>
+              <div className="flex gap-[8px] items-center">
+                <div className="flex flex-col gap-[4px]">
+                  <div className={`bg-white content-stretch flex items-start relative rounded-[6px] shrink-0 w-[140px]`}>
+                    <div aria-hidden="true" className={`absolute border border-solid inset-0 pointer-events-none rounded-[6px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] ${minError ? 'border-[#F04438]' : 'border-[#d0d5dd]'}`} />
+                    <input
+                      type="text"
+                      value={tonnageMin}
+                      onChange={(e) => setTonnageMin(e.target.value)}
+                      placeholder="Aantal"
+                      className="flex-1 px-[12px] py-[8px] font-sans font-normal leading-[20px] text-[#101828] text-[14px] bg-transparent outline-none rounded-l-[6px] w-0"
+                    />
+                    <div className="content-stretch flex items-center px-[12px] py-[8px] relative rounded-br-[8px] rounded-tr-[8px] shrink-0">
+                      <p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#475467] text-[14px] text-left whitespace-nowrap">t</p>
+                    </div>
                   </div>
+                  {minError && <p className="font-sans font-normal text-[#F04438] text-[12px] leading-[16px]">{minError}</p>}
+                </div>
+                <span className="font-sans font-normal text-[#475467] text-[14px]">–</span>
+                <div className="flex flex-col gap-[4px]">
+                  <div className={`bg-white content-stretch flex items-start relative rounded-[6px] shrink-0 w-[140px]`}>
+                    <div aria-hidden="true" className={`absolute border border-solid inset-0 pointer-events-none rounded-[6px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] ${maxError ? 'border-[#F04438]' : 'border-[#d0d5dd]'}`} />
+                    <input
+                      type="text"
+                      value={tonnageMax}
+                      onChange={(e) => setTonnageMax(e.target.value)}
+                      placeholder="Max"
+                      className="flex-1 px-[12px] py-[8px] font-sans font-normal leading-[20px] text-[#101828] text-[14px] bg-transparent outline-none rounded-l-[6px] w-0"
+                    />
+                    <div className="content-stretch flex items-center px-[12px] py-[8px] relative rounded-br-[8px] rounded-tr-[8px] shrink-0">
+                      <p className="font-sans font-bold leading-[20px] relative shrink-0 text-[#475467] text-[14px] text-left whitespace-nowrap">t</p>
+                    </div>
+                  </div>
+                  {maxError && <p className="font-sans font-normal text-[#F04438] text-[12px] leading-[16px]">{maxError}</p>}
                 </div>
               </div>
-              <div className="flex flex-col font-sans font-normal h-[36px] justify-center leading-[18px] relative shrink-0 text-[#475467] text-[12px]">
-                <p>
-                  <span className="font-sans font-bold">50%</span>
-                  {` van deze lading wordt naar de werklijst gezet`}
+              {hasMin && remainingFromMax >= 0 && (
+                <p className="font-sans font-normal leading-[18px] text-[#475467] text-[12px]">
+                  <span className="font-bold">{hasMax ? `${tonnageMin}–${tonnageMax}` : tonnageMin} ton</span>
+                  {' naar de werklijst · '}
+                  {remainingFromMax <= 0 && remainingFromMin <= 0
+                    ? 'volledige lading'
+                    : hasMax && remainingFromMax !== remainingFromMin
+                      ? `${remainingFromMax.toLocaleString('nl-NL')}–${remainingFromMin.toLocaleString('nl-NL')} ton over`
+                      : `${remainingFromMax.toLocaleString('nl-NL')} ton over`
+                  }
                 </p>
-              </div>
+              )}
             </div>
 
             {/* Vrachtprijs */}
